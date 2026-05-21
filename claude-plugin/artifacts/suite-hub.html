@@ -1,0 +1,242 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Suite Hub",
+  "schemaVersion": 1,
+  "mcpTools": [
+    "mcp__8935aad1-1da9-45a2-9cb4-f22ab8e10861__google_sheets_get_data_range",
+    "mcp__4eb5c533-25d2-4640-98d8-dbbd12ff6e5c__read_file_content"
+  ],
+  "mcpServerNames": [
+    "Zapier",
+    "Google Drive"
+  ]
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Podcast Suite — Home</title>
+<style>
+  :root {
+    --bg:#0f0f0f;--bg-hero:linear-gradient(180deg,#141414 0%,#0f0f0f 100%);--bg-card:#171717;--bg-card-h:#1b1b1b;--bg-setup:linear-gradient(135deg,#1a1a1a 0%,#181410 100%);--bg-strip:#131313;--border:#1e1e1e;--border-card:#242424;--border-card-h:#333;--text:#f0ece3;--text-muted:#555;--text-faint:#3a3a3a;--text-dimmed:#444;--gold:#c9a84c;--green:#5aab7d;--blue:#4a7fc1;--red:#c0504c;--shimmer-a:#222;--shimmer-b:#2a2a2a;--shadow-alert:#0f0f0f;color-scheme:dark;
+  }
+  [data-theme="light"] {
+    --bg:#f5f2ec;--bg-hero:linear-gradient(180deg,#edeae3 0%,#f5f2ec 100%);--bg-card:#ffffff;--bg-card-h:#faf8f5;--bg-setup:linear-gradient(135deg,#faf8f2 0%,#f5f0e0 100%);--bg-strip:#ffffff;--border:#dedad3;--border-card:#e2ddd6;--border-card-h:#c9a84c55;--text:#1a1710;--text-muted:#8a8480;--text-faint:#b5b0aa;--text-dimmed:#aaa8a3;--gold:#b8922e;--green:#3d8f5f;--blue:#3a6ca8;--red:#b03e3a;--shimmer-a:#e8e4de;--shimmer-b:#f0ece6;--shadow-alert:#ffffff;color-scheme:light;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif;min-height:100vh;transition:background .25s,color .25s;}
+  .hero{padding:40px 28px 32px;border-bottom:1px solid var(--border);background:var(--bg-hero);}
+  .hero-eyebrow{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+  .hero-show{font-size:28px;color:var(--text);letter-spacing:-.01em;margin-bottom:6px;line-height:1.2;}
+  .hero-show em{color:var(--gold);font-style:normal;}
+  .hero-sub{font-family:'Courier New',monospace;font-size:12px;color:var(--text-muted);letter-spacing:.03em;}
+  .hero-meta{display:flex;align-items:center;gap:20px;margin-top:22px;flex-wrap:wrap;}
+  .hero-stat{display:flex;flex-direction:column;gap:3px;}
+  .hero-stat-value{font-size:22px;color:var(--text);letter-spacing:-.02em;}
+  .hero-stat-value.gold{color:var(--gold);}
+  .hero-stat-label{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+  .hero-divider{width:1px;height:32px;background:var(--border-card);}
+  .hero-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .hero-config-badge{display:flex;align-items:center;gap:7px;font-family:'Courier New',monospace;font-size:11px;padding:5px 12px;border-radius:3px;}
+  .hero-config-badge.live{background:#1a3326;color:#5aab7d;border:1px solid #1e4434;}
+  .hero-config-badge.demo{background:#2a2000;color:#c9a84c;border:1px solid #3a3000;}
+  [data-theme="light"] .hero-config-badge.live{background:#e6f4ec;color:#2f7a50;border-color:#b8dfc9;}
+  [data-theme="light"] .hero-config-badge.demo{background:#fef8e6;color:#9a7020;border-color:#f0d88a;}
+  .badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .theme-toggle{background:none;border:1px solid var(--border-card);color:var(--text-muted);font-size:14px;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s,background .15s;flex-shrink:0;line-height:1;}
+  .theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
+  .grid-section{padding:28px;}
+  .section-label{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dimmed);margin-bottom:16px;}
+  .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .card{background:var(--bg-card);border:1px solid var(--border-card);border-radius:5px;padding:20px 20px 18px;position:relative;overflow:hidden;transition:border-color .18s,background .18s;cursor:default;}
+  .card.clickable{cursor:pointer;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:transparent;transition:background .18s;}
+  .card:hover{border-color:var(--border-card-h);background:var(--bg-card-h);}
+  .card:hover::before{background:#c9a84c44;}
+  .card-icon{font-size:18px;margin-bottom:14px;display:block;line-height:1;opacity:.85;}
+  .card-title{font-size:15px;color:var(--text);margin-bottom:5px;letter-spacing:.01em;}
+  .card-desc{font-family:'Courier New',monospace;font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:16px;}
+  .card-stats{display:flex;gap:16px;margin-bottom:16px;}
+  .card-stat-val{font-size:18px;color:var(--text);letter-spacing:-.02em;}
+  .card-stat-val.gold{color:var(--gold);}
+  .card-stat-val.green{color:var(--green);}
+  .card-stat-lbl{font-family:'Courier New',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+  .shimmer{display:inline-block;width:40px;height:18px;background:linear-gradient(90deg,var(--shimmer-a) 25%,var(--shimmer-b) 50%,var(--shimmer-a) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:2px;vertical-align:middle;}
+  @keyframes shimmer{to{background-position:-200% 0;}}
+  .card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);}
+  .open-hint{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);}
+  .open-arrow{font-size:14px;color:var(--text-faint);transition:color .15s,transform .15s;}
+  .card:hover .open-arrow{color:var(--gold);transform:translateX(3px);}
+  .card:hover .open-hint{color:var(--text-muted);}
+  .card.setup-card{border-color:var(--border-card-h);background:var(--bg-setup);}
+  .card.setup-card::before{background:#c9a84c66;}
+  .card-alert{position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 2px var(--shadow-alert);}
+  .activity-strip{margin:0 28px 28px;background:var(--bg-strip);border:1px solid var(--border);border-radius:4px;padding:16px 20px;}
+  .activity-title{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dimmed);margin-bottom:12px;}
+  .activity-items{display:flex;flex-direction:column;gap:8px;}
+  .activity-item{display:flex;align-items:center;gap:10px;font-family:'Courier New',monospace;font-size:11px;}
+  .activity-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .activity-text{color:var(--text-muted);flex:1;}
+  .activity-text strong{color:var(--text-muted);filter:brightness(1.4);}
+  [data-theme="light"] .activity-text strong{filter:brightness(0.65);}
+  .activity-time{color:var(--text-faint);}
+  .refresh-row{padding:0 28px 24px;display:flex;align-items:center;gap:12px;}
+  .refresh-btn{background:none;border:1px solid var(--border-card);color:var(--text-muted);font-family:'Courier New',monospace;font-size:11px;padding:6px 14px;border-radius:3px;cursor:pointer;letter-spacing:.05em;text-transform:uppercase;transition:border-color .15s,color .15s;}
+  .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .last-update{font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint);letter-spacing:.04em;}
+  @media(max-width:800px){.cards-grid{grid-template-columns:repeat(2,1fr);}.hero{padding:28px 20px 24px;}.grid-section{padding:20px;}}
+  @media(max-width:520px){.cards-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-eyebrow">Podcast Production Suite</div>
+  <div class="hero-show" id="heroTitle">Loading…</div>
+  <div class="hero-sub" id="heroSub">Production command center</div>
+  <div class="hero-meta">
+    <div class="hero-stat"><div class="hero-stat-value gold" id="heroEarned"><span class="shimmer"></span></div><div class="hero-stat-label">YTD Earned</div></div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><div class="hero-stat-value" id="heroDeals"><span class="shimmer"></span></div><div class="hero-stat-label">Active Deals</div></div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><div class="hero-stat-value" id="heroDownloads"><span class="shimmer"></span></div><div class="hero-stat-label">Total Downloads</div></div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat"><div class="hero-stat-value" id="heroGuests"><span class="shimmer"></span></div><div class="hero-stat-label">Guests Tracked</div></div>
+    <div class="hero-right">
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode" onclick="toggleTheme()">🌙</button>
+      <div class="hero-config-badge demo" id="configBadge"><span class="badge-dot"></span><span id="configText">Demo data</span></div>
+    </div>
+  </div>
+</div>
+<div class="grid-section">
+  <div class="section-label">Your Tools</div>
+  <div class="cards-grid">
+    <div class="card setup-card">
+      <span class="card-icon">⚙</span>
+      <div class="card-title">Setup Wizard</div>
+      <div class="card-desc">Connect your Google Sheet and configure all dashboards in one flow.</div>
+      <div class="card-stats"><div class="card-stat"><div class="card-stat-val" id="setupStatus"><span class="shimmer"></span></div><div class="card-stat-lbl">Status</div></div></div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card clickable" onclick="sendPrompt('Open the Sponsorship Tracker artifact')">
+      <span class="card-icon">📋</span>
+      <div class="card-title">Sponsorship Tracker</div>
+      <div class="card-desc">Deal pipeline with filter tabs, invoice status, and per-deal notes.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val gold" id="sponsorPipeline"><span class="shimmer"></span></div><div class="card-stat-lbl">Pipeline</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="sponsorDeals"><span class="shimmer"></span></div><div class="card-stat-lbl">Deals</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card">
+      <span class="card-icon">$</span>
+      <div class="card-title">Monthly Revenue</div>
+      <div class="card-desc">Earned vs contracted bar chart, type breakdown, and full deal table by year.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val gold" id="revEarned"><span class="shimmer"></span></div><div class="card-stat-lbl">Earned</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="revAvg"><span class="shimmer"></span></div><div class="card-stat-lbl">Avg Deal</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card" id="epCard">
+      <span class="card-icon">📊</span>
+      <div class="card-title">Episode Performance</div>
+      <div class="card-desc">Downloads analytics, above-average episodes highlighted, content gap alerts.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val" id="epTotal"><span class="shimmer"></span></div><div class="card-stat-lbl">Total Downloads</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="epAvg"><span class="shimmer"></span></div><div class="card-stat-lbl">Avg / Ep</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card" id="guestCard">
+      <span class="card-icon">👤</span>
+      <div class="card-title">Guest CRM</div>
+      <div class="card-desc">Guest pipeline by stage. Flags overdue follow-ups automatically.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val" id="guestTotal"><span class="shimmer"></span></div><div class="card-stat-lbl">Guests</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="guestOverdue"><span class="shimmer"></span></div><div class="card-stat-lbl">Overdue</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🔍</span>
+      <div class="card-title">Podcast Research Agent</div>
+      <div class="card-desc">AI-powered case research — suspects, timelines, episode angles on demand.</div>
+      <div class="card-stats"><div class="card-stat"><div class="card-stat-val" style="color:var(--text-muted);font-family:'Courier New',monospace;font-size:13px">AI-Powered</div><div class="card-stat-lbl">Research</div></div></div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card" id="pipeCard">
+      <span class="card-icon">🎬</span>
+      <div class="card-title">Production Pipeline</div>
+      <div class="card-desc">Case tracking from Discovery through Published. Expandable outline per case.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val gold" id="pipeActive">—</div><div class="card-stat-lbl">Active</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="pipeOutlined">—</div><div class="card-stat-lbl">Outlined</div></div>
+        <div class="card-stat"><div class="card-stat-val green" id="pipePublished">—</div><div class="card-stat-lbl">Published</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card clickable" id="newsletterCard" onclick="sendPrompt('Open the Marketing Newsletter artifact')">
+      <span class="card-icon">📣</span>
+      <div class="card-title">Marketing Dispatch</div>
+      <div class="card-desc">Show marketing hub — pipeline snapshot, social content queue, and promotion opportunities.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val gold" id="nlScripting"><span class="shimmer"></span></div><div class="card-stat-lbl">Ready to Tease</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="nlDiscovered"><span class="shimmer"></span></div><div class="card-stat-lbl">On Deck</div></div>
+        <div class="card-stat"><div class="card-stat-val green" id="nlPublished"><span class="shimmer"></span></div><div class="card-stat-lbl">Published</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+    <div class="card clickable" onclick="sendPrompt('Open the Anti-AI Checker artifact')">
+      <span class="card-icon">✗</span>
+      <div class="card-title">Anti-AI Checker</div>
+      <div class="card-desc">Paste text, get a Human Score, and color-coded flags for forbidden words, phrases, and patterns.</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val" style="color:var(--text-muted);font-family:'Courier New',monospace;font-size:13px">Interactive</div><div class="card-stat-lbl">Writing Tool</div></div>
+        <div class="card-stat"><div class="card-stat-val" style="color:var(--gold);font-family:'Courier New',monospace;font-size:13px">0–100</div><div class="card-stat-lbl">Human Score</div></div>
+      </div>
+      <div class="card-footer"><span class="open-hint">Open in sidebar</span><span class="open-arrow">→</span></div>
+    </div>
+  </div>
+</div>
+<div class="activity-strip">
+  <div class="activity-title">Recent Activity</div>
+  <div class="activity-items" id="activityItems">
+    <div class="activity-item"><div class="shimmer" style="width:6px;height:6px;border-radius:50%"></div><div class="shimmer" style="width:200px;height:12px"></div></div>
+    <div class="activity-item"><div class="shimmer" style="width:6px;height:6px;border-radius:50%"></div><div class="shimmer" style="width:160px;height:12px"></div></div>
+  </div>
+</div>
+<div class="refresh-row">
+  <button class="refresh-btn" onclick="loadAll()">↻ Refresh All</button>
+  <span class="last-update" id="lastUpdate"></span>
+</div>
+<script>
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);const btn=document.getElementById('themeToggle');if(btn)btn.textContent=t==='light'?'🌙':'☀️';}
+function toggleTheme(){const current=document.documentElement.getAttribute('data-theme')||'dark';const next=current==='dark'?'light':'dark';localStorage.setItem('suiteHubTheme',next);applyTheme(next);}
+(function(){const saved=localStorage.getItem('suiteHubTheme')||'dark';applyTheme(saved);})();
+const DEMO_SHEET_ID='1xSBdh6omlci1ckMJfV5_rjDpQVruPzHpDDY-j5JApiE';
+const SPREADSHEET_ID=localStorage.getItem('podcastDashboardSheetId')||DEMO_SHEET_ID;
+const IS_DEMO=!localStorage.getItem('podcastDashboardSheetId');
+const TOOL='mcp__8935aad1-1da9-45a2-9cb4-f22ab8e10861__google_sheets_get_data_range';
+const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const PIPE_ACTIVE=['Discovery','Research','Outline','Scripting','Recording','Editing'];
+const PIPELINE_FILE_ID='1pkV3tZtRhqjHU31P3Z5p_Xu-D20d2Mvf';
+const GDRIVE_READ_TOOL='mcp__4eb5c533-25d2-4640-98d8-dbbd12ff6e5c__read_file_content';
+const parseRate=r=>parseFloat((r||'0').replace(/[$,]/g,''))||0;
+const parseDl=r=>parseInt((r||'0').replace(/,/g,''),10)||0;
+function fmtMoney(n){if(n>=1e6)return'$'+(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1000)return'$'+(n/1000).toFixed(1).replace(/\.0$/,'')+'k';return'$'+n.toLocaleString();}
+function fmtNum(n){if(n>=1e6)return(n/1e6).toFixed(1).replace(/\.0$/,'')+'M';if(n>=1000)return(n/1000).toFixed(1).replace(/\.0$/,'')+'k';return n.toLocaleString();}
+function daysSince(s){if(!s)return null;const d=new Date(s);if(isNaN(d))return null;return Math.floor((Date.now()-d)/86400000);}
+function set(id,html){const el=document.getElementById(id);if(el)el.innerHTML=html;}
+function parsePipelineMd(text){const stageKeys={'DISCOVERED':'discovered','RESEARCHING':'researching','BRIEF COMPLETE':'brief','SCRIPTING':'scripting','RECORDED':'recorded','PUBLISHED':'published','SHELVED':'shelved'};const cases=[];let stage='',current=null;for(const raw of text.split('\n')){const line=raw.replace(/\\([#*\-\[\]_])/g,'$1').replace(/\*\*/g,'').trim();if(!line)continue;const sh=line.match(/^#{1,3}\s+([A-Z][A-Z\s]+)$/);if(sh&&stageKeys[sh[1].trim()]!==undefined){if(current)cases.push(current);current=null;stage=stageKeys[sh[1].trim()];continue;}const ch=line.match(/^#{3}\s+(.+)$/);if(ch&&stage){if(current)cases.push(current);current={name:ch[1].trim(),stage};continue;}}if(current)cases.push(current);return cases;}
+async function loadNewsletter(){try{const result=await window.cowork.callMcpTool(GDRIVE_READ_TOOL,{fileId:PIPELINE_FILE_ID});let text=typeof result==='string'?result:(result&&(result.content||result.text||result.body||JSON.stringify(result)));const cases=parsePipelineMd(text||'');set('nlScripting',cases.filter(c=>c.stage==='scripting').length.toString());set('nlDiscovered',cases.filter(c=>c.stage==='discovered').length.toString());set('nlPublished',`<span style="color:var(--green)">${cases.filter(c=>c.stage==='published').length}</span>`);}catch(e){set('nlScripting','—');set('nlDiscovered','—');set('nlPublished','—');}}
+window.addEventListener('DOMContentLoaded',()=>{const showName=localStorage.getItem('podcastDashboardShowName')||'Who Killed…?';const season=localStorage.getItem('podcastDashboardSeasonLabel')||'';set('heroTitle',`<em>${showName}</em>`);set('heroSub',season?`${season} · Production command center`:'Production command center');if(IS_DEMO){document.getElementById('configBadge').className='hero-config-badge demo';set('configText','Demo data');set('setupStatus','<span style="color:var(--gold);font-size:14px;font-family:\'Courier New\',monospace">Not set up</span>');}else{document.getElementById('configBadge').className='hero-config-badge live';set('configText','Live · Google Sheet');set('setupStatus','<span style="color:var(--green);font-size:14px;font-family:\'Courier New\',monospace">Connected</span>');}loadAll();});
+async function loadAll(){set('lastUpdate','');loadPipeline();loadNewsletter();const[sponsorResult,epResult,guestResult]=await Promise.allSettled([window.cowork.callMcpTool(TOOL,{spreadsheetId:SPREADSHEET_ID,sheetName:'Sheet1'}),window.cowork.callMcpTool(TOOL,{spreadsheetId:SPREADSHEET_ID,sheetName:'Episodes'}),window.cowork.callMcpTool(TOOL,{spreadsheetId:SPREADSHEET_ID,sheetName:'Guests'})]);try{const rows=(sponsorResult.value?.rows||sponsorResult.value?.data||sponsorResult.value||[]).filter(r=>r['COL$A']&&r['COL$A']!=='Company');const deals=rows.map(r=>({rate:parseRate(r['COL$G']),status:(r['COL$F']||'').toLowerCase(),airDate:r['COL$E']||''})).filter(d=>d.rate>0);const pipeline=deals.reduce((s,d)=>s+d.rate,0);const earned=deals.filter(d=>d.status==='completed'||d.status==='invoiced').reduce((s,d)=>s+d.rate,0);const avgDeal=deals.length?Math.round(pipeline/deals.length):0;const thisYear=new Date().getFullYear();const ytdDeals=deals.filter(d=>{if(!d.airDate)return false;const dt=new Date(d.airDate);return!isNaN(dt)&&dt.getFullYear()===thisYear;});const ytdEarned=ytdDeals.filter(d=>d.status==='completed'||d.status==='invoiced').reduce((s,d)=>s+d.rate,0);set('heroEarned',fmtMoney(ytdEarned||earned));set('heroDeals',deals.length.toString());set('sponsorPipeline',fmtMoney(pipeline));set('sponsorDeals',deals.length.toString());set('revEarned',fmtMoney(ytdEarned||earned));set('revAvg',fmtMoney(avgDeal));buildActivity(deals,rows);}catch(e){set('heroEarned','—');set('sponsorPipeline','—');set('sponsorDeals','—');set('revEarned','—');set('revAvg','—');}
+try{const rows=(epResult.value?.rows||epResult.value?.data||epResult.value||[]).filter(r=>r['COL$A']&&r['COL$A']!=='Episode Number');const eps=rows.map(r=>({dl:parseDl(r['COL$D'])}));const totalDl=eps.reduce((s,e)=>s+e.dl,0);const avgDl=eps.length?Math.round(totalDl/eps.length):0;set('heroDownloads',fmtNum(totalDl));set('epTotal',fmtNum(totalDl));set('epAvg',fmtNum(avgDl));}catch(e){set('heroDownloads','—');set('epTotal','—');set('epAvg','—');}
+try{const rows=(guestResult.value?.rows||guestResult.value?.data||guestResult.value||[]).filter(r=>r['COL$A']&&r['COL$A']!=='Name');const guests=rows.map(r=>({stage:(r['COL$D']||'').toLowerCase(),outreachDate:r['COL$E']||'',lastContact:r['COL$F']||''}));const overdue=guests.filter(g=>{if(g.stage==='outreached'){const d=daysSince(g.outreachDate);return d!==null&&d>14;}if(g.stage==='responded'){const d=daysSince(g.lastContact);return d!==null&&d>21;}return false;}).length;set('heroGuests',rows.length.toString());set('guestTotal',rows.length.toString());set('guestOverdue',overdue>0?`<span style="color:var(--red)">${overdue}</span>`:`<span style="color:var(--green)">0</span>`);if(overdue>0){const el=document.getElementById('guestCard');if(el&&!el.querySelector('.card-alert')){const dot=document.createElement('div');dot.className='card-alert';el.appendChild(dot);}}}catch(e){set('heroGuests','—');set('guestTotal','—');set('guestOverdue','—');}
+const now=new Date();set('lastUpdate',`Updated ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`);}
+function loadPipeline(){try{const data=JSON.parse(localStorage.getItem('wkPipeline')||'[]');const active=data.filter(c=>PIPE_ACTIVE.includes(c.stage)).length;const outlined=data.filter(c=>{const o=c.outline||{};return!!(o.coldOpen||o.timeline||o.suspects||o.structure||o.production);}).length;const published=data.filter(c=>c.stage==='Published').length;set('pipeActive',active.toString());set('pipeOutlined',outlined>0?`<span style="color:var(--blue)">${outlined}</span>`:'0');set('pipePublished',published>0?`<span style="color:var(--green)">${published}</span>`:'0');}catch(e){set('pipeActive','—');set('pipeOutlined','—');set('pipePublished','—');}}
+function buildActivity(deals,rawRows){const COLOR_MAP={completed:'var(--green)',invoiced:'var(--blue)',contracted:'var(--blue)',pending:'var(--gold)'};const sorted=rawRows.filter(r=>r['COL$A']&&r['COL$E']).map(r=>({company:r['COL$A'],date:r['COL$E'],status:(r['COL$F']||'pending').toLowerCase(),rate:parseRate(r['COL$G'])})).filter(r=>!isNaN(new Date(r.date))).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);if(!sorted.length){set('activityItems','<div style="color:var(--text-faint);font-family:\'Courier New\',monospace;font-size:11px">No recent deals</div>');return;}const html=sorted.map(r=>{const d=new Date(r.date);const mo=MONTH_NAMES[d.getMonth()]+' '+d.getFullYear();const col=COLOR_MAP[r.status]||'var(--text-muted)';const label=r.status.charAt(0).toUpperCase()+r.status.slice(1);return`<div class="activity-item"><div class="activity-dot" style="background:${col}"></div><div class="activity-text"><strong>${r.company}</strong> — ${label} ${fmtMoney(r.rate)}</div><div class="activity-time">${mo}</div></div>`;}).join('');set('activityItems',html);}
+</script>
+</body>
+</html>

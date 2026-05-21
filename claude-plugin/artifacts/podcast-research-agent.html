@@ -1,0 +1,499 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Podcast Research Agent",
+  "schemaVersion": 1
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Podcast Research Agent</title>
+<style>
+:root { color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: Georgia, 'Times New Roman', serif; background: #0f0f0f; color: #f0ece3; height: 100vh; overflow: hidden; }
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Top bar */
+.topbar { height: 50px; background: #0a0a0a; border-bottom: 1px solid #242424; display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
+.logo-mark { width: 26px; height: 26px; border-radius: 4px; background: #c9a84c; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-mark svg { width: 13px; height: 13px; }
+.logo-name { font-size: 13px; color: #f0ece3; letter-spacing: 0.3px; }
+.logo-beta { font-size: 9px; padding: 2px 6px; background: rgba(201,168,76,0.12); color: #c9a84c; border: 1px solid rgba(201,168,76,0.25); border-radius: 2px; font-family: 'Courier New', monospace; letter-spacing: 1px; text-transform: uppercase; }
+.top-show { font-size: 10px; font-family: 'Courier New', monospace; color: #444; letter-spacing: 1px; text-transform: uppercase; }
+.top-sp { flex: 1; }
+.top-btn { font-size: 11px; font-family: 'Courier New', monospace; letter-spacing: 1px; text-transform: uppercase; color: #444; background: transparent; border: 1px solid transparent; padding: 4px 10px; border-radius: 2px; cursor: pointer; transition: all .15s; }
+.top-btn:hover { border-color: #2a2a2a; color: #888; }
+
+/* Body layout */
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+.sidebar { width: 190px; background: #0a0a0a; border-right: 1px solid #1e1e1e; overflow-y: auto; flex-shrink: 0; padding: 12px 0; }
+.slbl { font-size: 9px; font-weight: normal; letter-spacing: 2.5px; text-transform: uppercase; color: #333; font-family: 'Courier New', monospace; padding: 8px 14px 4px; }
+.si { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 12px; font-family: 'Courier New', monospace; color: #555; cursor: pointer; transition: all .12s; border-left: 2px solid transparent; }
+.si:hover { background: rgba(201,168,76,0.05); color: #888; }
+.si.on { background: rgba(201,168,76,0.08); color: #c9a84c; border-left-color: #c9a84c; }
+.sdot { width: 4px; height: 4px; border-radius: 50%; background: #2a2a2a; flex-shrink: 0; transition: background .12s; }
+.si.on .sdot { background: #c9a84c; }
+.sdiv { height: 1px; background: #1a1a1a; margin: 8px 0; }
+
+/* Main */
+.main { flex: 1; overflow: auto; background: #0f0f0f; display: flex; flex-direction: column; }
+.v { flex-direction: column; flex: 1; display: none; }
+.v.on { display: flex; }
+
+/* Landing */
+.land { align-items: center; justify-content: center; padding: 32px 20px; }
+.land-in { width: 100%; max-width: 520px; }
+.eye { font-size: 10px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; color: #c9a84c; font-family: 'Courier New', monospace; text-align: center; margin-bottom: 8px; }
+.h1 { font-size: 26px; font-weight: normal; color: #f0ece3; text-align: center; line-height: 1.3; margin-bottom: 6px; }
+.sub { font-size: 13px; color: #555; text-align: center; margin-bottom: 28px; line-height: 1.7; font-family: 'Courier New', monospace; }
+
+.scard { background: #171717; border: 1px solid #242424; border-radius: 3px; padding: 18px; }
+.slbl2 { font-size: 9px; font-family: 'Courier New', monospace; letter-spacing: 2px; text-transform: uppercase; color: #555; margin-bottom: 8px; }
+.srow { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.sinput { flex: 1; background: #111; border: 1px solid #2a2a2a; border-radius: 2px; padding: 10px 12px; font-size: 14px; font-family: Georgia, serif; color: #f0ece3; outline: none; transition: border-color .2s; }
+.sinput:focus { border-color: #c9a84c; }
+.sinput::placeholder { color: #2d2d2d; }
+.sbtn { padding: 10px 18px; background: #c9a84c; color: #0f0f0f; border: none; border-radius: 2px; font-size: 13px; font-family: Georgia, serif; cursor: pointer; white-space: nowrap; transition: opacity .15s; }
+.sbtn:hover { opacity: .85; }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip { padding: 3px 10px; border-radius: 2px; font-size: 10px; font-family: 'Courier New', monospace; letter-spacing: .5px; border: 1px solid #242424; color: #555; cursor: pointer; background: transparent; text-transform: uppercase; transition: all .12s; }
+.chip.on { border-color: rgba(201,168,76,.4); color: #c9a84c; background: rgba(201,168,76,.07); }
+
+.feats { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 16px; }
+.feat { background: #171717; border: 1px solid #242424; border-radius: 3px; padding: 14px; }
+.ficon { width: 26px; height: 26px; border-radius: 3px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; background: rgba(201,168,76,.1); }
+.ft { font-size: 12px; color: #f0ece3; margin-bottom: 3px; }
+.fd { font-size: 11px; color: #555; line-height: 1.5; font-family: 'Courier New', monospace; }
+
+.rec { margin-top: 18px; }
+.rlbl { font-size: 9px; font-weight: normal; text-transform: uppercase; letter-spacing: 2px; color: #444; font-family: 'Courier New', monospace; margin-bottom: 7px; }
+.rchips { display: flex; flex-wrap: wrap; gap: 5px; }
+.rchip { padding: 4px 12px; background: #171717; border: 1px solid #242424; border-radius: 2px; font-size: 11px; font-family: 'Courier New', monospace; color: #555; cursor: pointer; transition: all .12s; text-transform: uppercase; letter-spacing: .5px; }
+.rchip:hover { border-color: rgba(201,168,76,.3); color: #c9a84c; }
+
+/* Loading */
+.load { align-items: center; justify-content: center; padding: 32px 20px; }
+.load-in { width: 100%; max-width: 460px; }
+.lkick { font-size: 10px; font-weight: normal; text-transform: uppercase; letter-spacing: 3px; color: #c9a84c; font-family: 'Courier New', monospace; text-align: center; margin-bottom: 6px; }
+.lcn { font-size: 22px; font-weight: normal; text-align: center; color: #f0ece3; margin-bottom: 4px; }
+.lsub { font-size: 12px; color: #555; text-align: center; margin-bottom: 24px; font-family: 'Courier New', monospace; letter-spacing: .3px; }
+.pipe { display: flex; flex-direction: column; gap: 6px; }
+.step { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: #171717; border: 1px solid #242424; border-left: 3px solid #1e1e1e; border-radius: 3px; transition: border-color .2s; }
+.step.sa { border-left-color: #c9a84c; background: #1a1a15; }
+.step.sd { border-left-color: #5aab7d; background: #131a15; }
+.sring { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #2a2a2a; background: #111; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.step.sa .sring { border-color: #c9a84c; background: #c9a84c; animation: pPulse 1.2s ease-in-out infinite; }
+.step.sd .sring { border-color: #5aab7d; background: #5aab7d; }
+@keyframes pPulse { 0%,100%{opacity:1}50%{opacity:0.6} }
+.spin { width: 9px; height: 9px; border: 1.5px solid rgba(15,15,15,0.3); border-top-color: #0f0f0f; border-radius: 50%; animation: pSpin .8s linear infinite; }
+@keyframes pSpin { to{transform:rotate(360deg)} }
+.snum { font-size: 10px; color: #444; font-family: 'Courier New', monospace; }
+.stit { flex: 1; font-size: 12px; font-family: 'Courier New', monospace; color: #666; letter-spacing: .3px; }
+.step.sa .stit { color: #c9a84c; }
+.step.sd .stit { color: #5aab7d; }
+.sres { font-size: 10px; font-family: 'Courier New', monospace; color: #444; }
+.step.sd .sres { color: #5aab7d; }
+
+/* Results */
+.res { flex: 1; overflow: hidden; display: none; flex-direction: column; }
+.res.on { display: flex; }
+.rbar { background: #0a0a0a; border-bottom: 1px solid #1e1e1e; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.rbk { font-size: 11px; font-family: 'Courier New', monospace; letter-spacing: 1px; text-transform: uppercase; color: #555; background: transparent; border: 1px solid #2a2a2a; border-radius: 2px; padding: 5px 11px; cursor: pointer; transition: all .15s; }
+.rbk:hover { border-color: #444; color: #888; }
+.rcn { font-size: 14px; color: #f0ece3; flex: 1; }
+.rmeta { font-size: 11px; color: #444; font-family: 'Courier New', monospace; }
+.expbtn { font-size: 11px; font-family: 'Courier New', monospace; letter-spacing: 1px; text-transform: uppercase; color: #c9a84c; background: rgba(201,168,76,.08); border: 1px solid rgba(201,168,76,.25); border-radius: 2px; padding: 5px 13px; cursor: pointer; transition: all .15s; }
+.expbtn:hover { background: rgba(201,168,76,.14); }
+.rbody { flex: 1; overflow: hidden; display: grid; grid-template-columns: 280px 1fr; }
+
+/* Source panel */
+.src-panel { border-right: 1px solid #1e1e1e; overflow-y: auto; background: #0a0a0a; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.ph { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.plbl { font-size: 9px; font-weight: normal; text-transform: uppercase; letter-spacing: 2px; color: #444; font-family: 'Courier New', monospace; }
+.sc { background: #171717; border: 1px solid #242424; border-radius: 3px; padding: 10px 12px; cursor: pointer; transition: border-color .15s; }
+.sc:hover { border-color: #333; }
+.stop { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+.bdg { font-size: 9px; font-family: 'Courier New', monospace; font-weight: normal; letter-spacing: 1px; padding: 2px 7px; border-radius: 2px; text-transform: uppercase; }
+.bn { background: rgba(201,168,76,.12); color: #c9a84c; border: 1px solid rgba(201,168,76,.25); }
+.bc { background: rgba(74,127,193,.12); color: #4a7fc1; border: 1px solid rgba(74,127,193,.25); }
+.bw { background: rgba(90,171,125,.12); color: #5aab7d; border: 1px solid rgba(90,171,125,.25); }
+.bb { background: rgba(155,109,212,.12); color: #9b6dd4; border: 1px solid rgba(155,109,212,.25); }
+.bp { background: rgba(100,100,100,.12); color: #888; border: 1px solid rgba(100,100,100,.2); }
+.srel { margin-left: auto; font-size: 10px; font-family: 'Courier New', monospace; color: #444; }
+.stitle { font-size: 12px; color: #f0ece3; margin-bottom: 3px; line-height: 1.4; }
+.ssnip { font-size: 11px; color: #555; font-family: 'Courier New', monospace; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sfoot { display: flex; gap: 8px; margin-top: 6px; }
+.soutlet { font-size: 10px; font-family: 'Courier New', monospace; color: #666; }
+.sdate   { font-size: 10px; font-family: 'Courier New', monospace; color: #444; }
+
+/* Output panel */
+.out-panel { overflow-y: auto; background: #0f0f0f; padding: 16px; }
+.oph { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.otabs { display: flex; gap: 0; border: 1px solid #242424; border-radius: 2px; overflow: hidden; }
+.otab { font-size: 11px; font-family: 'Courier New', monospace; letter-spacing: 1px; text-transform: uppercase; padding: 6px 13px; color: #555; cursor: pointer; border: none; border-right: 1px solid #242424; background: transparent; transition: all .15s; }
+.otab:last-child { border-right: none; }
+.otab:hover { background: #1a1a1a; color: #888; }
+.otab.on { background: #c9a84c; color: #0f0f0f; }
+.score-badge { font-size: 11px; font-family: 'Courier New', monospace; color: #c9a84c; background: rgba(201,168,76,.1); border-radius: 2px; padding: 4px 10px; border: 1px solid rgba(201,168,76,.25); }
+
+/* Outline sections */
+.sec { background: #171717; border: 1px solid #242424; border-radius: 3px; margin-bottom: 6px; overflow: hidden; }
+.shdr { display: flex; align-items: center; gap: 10px; padding: 11px 13px; cursor: pointer; user-select: none; transition: background .12s; }
+.shdr:hover { background: #1e1e1e; }
+.sn { width: 20px; height: 20px; border-radius: 2px; background: rgba(201,168,76,.12); color: #c9a84c; font-size: 10px; font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sl { flex: 1; }
+.sname { font-size: 13px; color: #f0ece3; }
+.stag { font-size: 9px; font-family: 'Courier New', monospace; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.stime { font-size: 11px; font-family: 'Courier New', monospace; color: #444; white-space: nowrap; }
+.sarr { font-size: 9px; color: #333; transition: transform .2s; }
+.sec.open .sarr { transform: rotate(90deg); }
+.sbody { display: none; padding: 0 13px 12px; border-top: 1px solid #1e1e1e; }
+.sec.open .sbody { display: block; }
+.tp { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; font-family: 'Courier New', monospace; color: #888; line-height: 1.6; align-items: flex-start; }
+.tp:last-child { border-bottom: none; }
+.tpdot { width: 4px; height: 4px; border-radius: 50%; background: #c9a84c; margin-top: 7px; flex-shrink: 0; }
+.oq { padding: 8px 10px; background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.15); border-radius: 2px; font-size: 12px; font-family: 'Courier New', monospace; color: #888; margin-bottom: 6px; line-height: 1.6; }
+.trow { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px; align-items: flex-start; }
+.trow:last-child { border-bottom: none; }
+.td { font-size: 10px; font-family: 'Courier New', monospace; color: #c9a84c; width: 100px; flex-shrink: 0; padding-top: 1px; }
+.te { font-family: 'Courier New', monospace; color: #888; line-height: 1.6; font-size: 11px; }
+
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo-mark"><svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="7" cy="7" r="5.5" stroke="#0f0f0f" stroke-width="1.5"/><circle cx="7" cy="7" r="2" fill="#0f0f0f"/></svg></div>
+    <span class="logo-name">Research Agent</span>
+    <span class="logo-beta">beta</span>
+    <span class="top-show" id="top-show"></span>
+    <div class="top-sp"></div>
+    <button class="top-btn">My cases</button>
+    <button class="top-btn">Templates</button>
+  </div>
+  <div class="body">
+    <div class="sidebar">
+      <div class="slbl">Recent</div>
+      <div class="si on" data-case="Amy Mihaljevic"><div class="sdot"></div>Amy Mihaljevic</div>
+      <div class="si" data-case="JonBenét Ramsey"><div class="sdot"></div>JonBenét Ramsey</div>
+      <div class="si" data-case="Zodiac Killer"><div class="sdot"></div>Zodiac Killer</div>
+      <div class="si" data-case="Scott Peterson"><div class="sdot"></div>Scott Peterson</div>
+      <div class="sdiv"></div>
+      <div class="slbl">Saved</div>
+      <div class="si" data-case="Etan Patz"><div class="sdot"></div>Etan Patz</div>
+      <div class="si" data-case="Golden State Killer"><div class="sdot"></div>Golden State Killer</div>
+      <div class="sdiv"></div>
+      <div class="slbl">Tools</div>
+      <div class="si tool-si"><div class="sdot"></div>Guest prep</div>
+      <div class="si tool-si"><div class="sdot"></div>Hook generator</div>
+      <div class="si tool-si"><div class="sdot"></div>Show notes</div>
+    </div>
+    <div class="main" id="main">
+      <div class="v land" id="v-land">
+        <div class="land-in">
+          <div class="eye">Research partner</div>
+          <div class="h1">What are you covering next?</div>
+          <div class="sub">Enter a case name, guest, or topic and get sources,<br>timelines, suspects, and a ready-to-record outline.</div>
+          <div class="scard">
+            <div class="slbl2">Case or topic name</div>
+            <div class="srow">
+              <input class="sinput" id="ci" type="text" placeholder="e.g. Amy Mihaljevic" autocomplete="off"/>
+              <button class="sbtn" id="go-btn">Research</button>
+            </div>
+            <div class="chips">
+              <div class="chip on">True crime case</div>
+              <div class="chip">Cold case</div>
+              <div class="chip">Guest interview</div>
+              <div class="chip">News event</div>
+            </div>
+          </div>
+          <div class="feats">
+            <div class="feat"><div class="ficon"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="#c9a84c" stroke-width="1.4"/><line x1="9.2" y1="9.2" x2="12.5" y2="12.5" stroke="#c9a84c" stroke-width="1.4" stroke-linecap="round"/></svg></div><div class="ft">Source discovery</div><div class="fd">News, court docs, books, and podcasts in one search.</div></div>
+            <div class="feat"><div class="ficon"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="1.5" width="9" height="11" rx="1.5" stroke="#c9a84c" stroke-width="1.4"/><line x1="5" y1="5" x2="9" y2="5" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/><line x1="5" y1="7.5" x2="9" y2="7.5" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/><line x1="5" y1="10" x2="7.5" y2="10" stroke="#c9a84c" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="ft">Document analysis</div><div class="fd">Key facts, suspects, and timelines extracted automatically.</div></div>
+            <div class="feat"><div class="ficon"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="4" height="4" rx="1" fill="#c9a84c"/><line x1="8" y1="3.5" x2="12.5" y2="3.5" stroke="#c9a84c" stroke-width="1.4" stroke-linecap="round"/><rect x="1.5" y="8.5" width="4" height="4" rx="1" fill="#c9a84c"/><line x1="8" y1="10.5" x2="12.5" y2="10.5" stroke="#c9a84c" stroke-width="1.4" stroke-linecap="round"/></svg></div><div class="ft">Episode outline</div><div class="fd">Structured, timed, hook to outro — ready to record.</div></div>
+          </div>
+          <div class="rec">
+            <div class="rlbl">Quick launch</div>
+            <div class="rchips">
+              <div class="rchip" data-qs="Amy Mihaljevic">Amy Mihaljevic</div>
+              <div class="rchip" data-qs="JonBenét Ramsey">JonBenét Ramsey</div>
+              <div class="rchip" data-qs="Zodiac Killer">Zodiac Killer</div>
+              <div class="rchip" data-qs="Scott Peterson">Scott Peterson</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="v load" id="v-load">
+        <div class="load-in">
+          <div class="lkick">Researching case</div>
+          <div class="lcn" id="lcn">—</div>
+          <div class="lsub">Searching archives, pulling documents, building your outline...</div>
+          <div class="pipe" id="pipe">
+            <div class="step" id="s0"><div class="sring"><span class="snum">1</span></div><div class="stit">Searching news archives</div><div class="sres" id="r0"></div></div>
+            <div class="step" id="s1"><div class="sring"><span class="snum">2</span></div><div class="stit">Retrieving court documents</div><div class="sres" id="r1"></div></div>
+            <div class="step" id="s2"><div class="sring"><span class="snum">2</span></div><div class="stit">Pulling Wikipedia and encyclopedia entries</div><div class="sres" id="r2"></div></div>
+            <div class="step" id="s3"><div class="sring"><span class="snum">4</span></div><div class="stit">Identifying key players and suspects</div><div class="sres" id="r3"></div></div>
+            <div class="step" id="s4"><div class="sring"><span class="snum">5</span></div><div class="stit">Building episode outline</div><div class="sres" id="r4"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="res" id="v-res">
+        <div class="rbar">
+          <button class="rbk" id="back-btn">← New search</button>
+          <div class="rcn" id="rcn">—</div>
+          <div class="rmeta" id="rmeta"></div>
+          <button class="expbtn" id="exp-btn">Export .docx</button>
+        </div>
+        <div class="rbody">
+          <div class="src-panel" id="src-panel"></div>
+          <div class="out-panel">
+            <div class="oph">
+              <div class="otabs">
+                <button class="otab on" data-tab="outline">Episode outline</button>
+                <button class="otab" data-tab="timeline">Timeline</button>
+                <button class="otab" data-tab="questions">Open questions</button>
+              </div>
+              <div class="score-badge" id="score">—</div>
+            </div>
+            <div id="out-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const sn = localStorage.getItem('podcastDashboardShowName');
+const sl = localStorage.getItem('podcastDashboardSeasonLabel');
+if (sn) document.getElementById('top-show').textContent = sn + (sl ? ' · ' + sl : '');
+
+const C={
+'amy mihaljevic':{score:'8.4/10',sources:[
+{b:'bn',bt:'news',t:'Bay Village girl abducted in broad daylight — FBI called in',s:'Amy Mihaljevic, 10, was lured from a strip mall near her home by a man posing as a family friend of her mother.',o:'Cleveland Plain Dealer',d:'Nov 1989',r:'98%'},
+{b:'bn',bt:'news',t:'Body found in Ashland County field identified as Amy Mihaljevic',s:'After four months, investigators found the remains of the Bay Village girl in a rural Ohio field near Ruggles Township.',o:'Associated Press',d:'Feb 1990',r:'97%'},
+{b:'bc',bt:'court',t:'Mihaljevic case: FBI investigative files (FOIA release)',s:'Federal case files including suspect interviews, tip logs, forensic evidence summaries, and timeline reconstruction.',o:'FBI / FOIA',d:'2009',r:'95%'},
+{b:'bw',bt:'wiki',t:'Amy Mihaljevic — Wikipedia',s:'Overview of the abduction, investigation history, key suspects, and legacy in true crime media.',o:'Wikipedia',d:'Updated 2024',r:'90%'},
+{b:'bb',bt:'book',t:'On the Trail of the Smiley Face Killer — James Renner',s:'Cleveland journalist James Renner\'s investigation and his own suspect theories on the Mihaljevic case.',o:'Gray & Co. Publishers',d:'2006',r:'88%'},
+{b:'bn',bt:'news',t:'Cleveland police reopen Mihaljevic investigation',s:'Advances in DNA technology prompt investigators to revisit physical evidence collected in 1989.',o:'WEWS NewsChannel 5',d:'2016',r:'82%'},
+{b:'bp',bt:'podcast',t:'Your Own Backyard — "Bay Village" episode',s:'Chris Lambert\'s investigative podcast examines the geographic and behavioral profile of Amy\'s abductor.',o:'Podcast',d:'2021',r:'79%'},
+{b:'bn',bt:'news',t:'Thirty years later, Amy Mihaljevic\'s murder remains unsolved',s:'Former classmates, investigators, and her father reflect on the case that haunted an Ohio community for decades.',o:'Cleveland.com',d:'2019',r:'77%'}
+],outline:[
+{n:1,name:'Cold open — the hook',tag:'Opening',time:'0:00–2:00',pts:['Set the scene: Bay Village, Ohio. October 27, 1989. A sunny Saturday. A strip mall. A girl waiting.','Voice Amy\'s last known words to her friend: "I\'m going to see my mom\'s boss and get her a surprise."','Hard cut: she was never seen alive again — in broad daylight, in a busy parking lot.']},
+{n:2,name:'Background — Amy\'s world',tag:'Context',time:'2:00–6:00',pts:['Who was Amy? Bay Village, a safe Cleveland suburb. Fourth grade. Horse-obsessed. Funny.','Her parents: Margery and Mark Mihaljevic. Family dynamics. Her mother\'s new job.','The week before: a phone call. A man telling Amy her mother was getting a promotion — and needed a surprise gift from Amy.']},
+{n:3,name:'The abduction — what we know',tag:'The case',time:'6:00–14:00',pts:['A man called Amy\'s school phone line several times in the days before the abduction.','He presented himself as her mother\'s boss — asked Amy to help plan a surprise for her mom.','Eyewitness accounts of a man at the strip mall. Composite sketches. The strange consistency — and the gaps.','Why Bay Village? Why Amy? The investigator\'s early theories.']},
+{n:4,name:'The discovery — four months later',tag:'Timeline',time:'14:00–19:00',pts:['February 8, 1990. A rural field in Ashland County, Ohio. A farmer finds something.','Amy had been there through winter. Forensic evidence: what was preserved, what wasn\'t.','Cause of death. The condition of the evidence. The FBI\'s frustration.']},
+{n:5,name:'Suspects over the years',tag:'Investigation',time:'19:00–27:00',pts:['The original composite sketch — and how many tips it generated.','A Bay Village teacher who knew the school. His alibi. The evidence against and for.','James Renner\'s theory: a local journalist with access to school directories.','The DNA question: evidence was collected. Has it ever produced a hit?']},
+{n:6,name:'Why this case still haunts Ohio',tag:'Legacy',time:'27:00–30:00',pts:['The tip line is still open. Advances in genealogical DNA technology.','Amy\'s father Mark and his decades-long push to keep the case in public view.','Close: a killer never named. A family that never had answers. The question still standing.']}
+],timeline:[
+{d:'Oct 1989',e:'Unknown man calls Bay Village schools posing as mother\'s employer, asking to speak with Amy directly.'},
+{d:'Oct 27, 1989',e:'Amy Mihaljevic, age 10, last seen at the Bay Square shopping center, Bay Village, Ohio.'},
+{d:'Nov 1989',e:'FBI joins investigation. Tip lines receive thousands of calls. Composite sketch released nationally.'},
+{d:'Feb 8, 1990',e:'Amy\'s body discovered in a rural field in Ruggles Township, Ashland County, Ohio.'},
+{d:'Feb 1990',e:'Cause of death determined. Bay Village teacher briefly investigated and later cleared.'},
+{d:'2006',e:'James Renner publishes investigation in Cleveland Scene; introduces new suspect theories to the public.'},
+{d:'2009',e:'FBI releases partial case files under FOIA. New forensic review initiated.'},
+{d:'2016',e:'Investigators revisit DNA evidence. Genealogical DNA techniques begin to show promise.'},
+{d:'2024',e:'Case remains officially open. No arrest has ever been made. Tip line still active.'}
+],questions:[
+'Has genealogical DNA (as used in the Golden State Killer case) been applied to Amy\'s physical evidence?',
+'What is the current status of the Bay Village teacher as a suspect — has he ever been formally cleared by investigators?',
+'Why was Amy selected specifically? Was the abductor connected to her school, or was she a target of opportunity?',
+'The phone call method suggests premeditation and school familiarity. Could this be someone who worked in education?',
+'Are there similar unsolved Ohio cases from the same period that share a behavioral profile with this abductor?'
+]},
+'jonbenét ramsey':{score:'9.2/10',sources:[
+{b:'bn',bt:'news',t:'JonBenét Ramsey found murdered in parents\' Boulder home',s:'The 6-year-old beauty pageant contestant was found strangled in the basement of her family\'s home on December 26, 1996.',o:'Boulder Daily Camera',d:'Dec 1996',r:'98%'},
+{b:'bc',bt:'court',t:'Boulder County grand jury findings — full document (released 2013)',s:'Grand jury voted in 1999 to indict John and Patsy Ramsey for child abuse resulting in death. DA Alex Hunter declined to sign.',o:'Boulder County DA',d:'2013',r:'96%'},
+{b:'bn',bt:'news',t:'DNA evidence publicly exonerates Ramsey family',s:'Boulder DA Mary Lacy announces that new touch DNA found on JonBenét\'s clothing points to an unknown male, clearing the family.',o:'Associated Press',d:'2008',r:'94%'},
+{b:'bw',bt:'wiki',t:'JonBenét Ramsey — Wikipedia',s:'Comprehensive overview of the murder, investigation, suspects, DNA evidence, and ongoing public and legal debate.',o:'Wikipedia',d:'Updated 2024',r:'91%'},
+{b:'bb',bt:'book',t:'Perfect Murder, Perfect Town — Lawrence Schiller',s:'Definitive account of the Boulder investigation, the war between prosecutors and the Ramseys, and the evidence never fully explained.',o:'HarperCollins',d:'1999',r:'88%'},
+{b:'bn',bt:'news',t:'CBS documentary fingers Burke Ramsey — and the lawsuit that followed',s:'A 2016 CBS special theorized Burke Ramsey as the killer. He sued for defamation and settled for an undisclosed sum in 2019.',o:'Entertainment Weekly',d:'2016',r:'84%'},
+{b:'bc',bt:'court',t:'Ramsey grand jury indictment — what it actually said',s:'Unsealed documents reveal the jury indicted both parents for placing the child in a situation that led to her death — not for the murder itself.',o:'Denver Post',d:'2013',r:'80%'},
+{b:'bp',bt:'podcast',t:'Cold — JonBenét Ramsey series',s:'Seven-episode deep dive into the physical evidence, grand jury proceedings, and the intruder vs. family debate.',o:'Podcast',d:'2023',r:'76%'}
+],outline:[
+{n:1,name:'Cold open — Christmas night, 1996',tag:'Opening',time:'0:00–2:00',pts:['Boulder, Colorado. December 26, 1996. A 911 call at 5:52am. A mother screaming.','A little girl who should have been opening presents. And a ransom note that should not exist.','By the end of this episode you will have a theory. You may not like it.']},
+{n:2,name:'Background — the Ramseys\' world',tag:'Context',time:'2:00–6:00',pts:['JonBenét: 6 years old, beauty pageant circuit, beloved in Boulder\'s social elite.','John Ramsey: Access Graphics CEO. Patsy: former Miss West Virginia, devoted mother.','The house at 755 15th Street. The Christmas party the night before. The family going to bed.']},
+{n:3,name:'The discovery — and the catastrophic first hours',tag:'The case',time:'6:00–14:00',pts:['The ransom note: two and a half pages, written in the house, referencing a "small foreign faction." Nobody can explain it.','Boulder PD fails to secure the scene. Friends of the family arrive before investigators. Evidence potentially destroyed.','Seven hours after the 911 call, John Ramsey finds JonBenét\'s body in the basement wine cellar.','The garrote. The head trauma. The cause of death — and what it tells us about the killer.']},
+{n:4,name:'The investigation — and the war with the Ramseys',tag:'Investigation',time:'14:00–21:00',pts:['Boulder PD vs. the Ramsey legal team: one of the most combative investigations in true crime history.','Patsy\'s handwriting: examined by multiple experts. Results were inconclusive — which is itself a data point.','The grand jury convenes in 1999. Votes to indict both parents. DA Hunter refuses to sign.','Why didn\'t he? What did he know that the public didn\'t?']},
+{n:5,name:'The DNA problem',tag:'Evidence',time:'21:00–27:00',pts:['Unknown male DNA found on JonBenét\'s underwear and long johns. Not John. Not Burke. Not any known suspect.','2008: DA Lacy publicly exonerates the family based on this touch DNA. The intruder theory gains its strongest footing.','But intruder theory requires someone to enter a locked house, leave no trace, spend hours inside, and exit undetected.','What the evidence supports — and what it still doesn\'t explain.']},
+{n:6,name:'Who killed JonBenét?',tag:'Legacy',time:'27:00–30:00',pts:['Three theories still standing: an intruder, Patsy (accidental staging gone wrong), or Burke.','Patsy Ramsey died of ovarian cancer in 2006, never charged. John Ramsey is still alive.','Burke won a defamation settlement in 2019 — what that tells us about the state of the evidence.','Close: one of the most studied cold cases in American history. Still no answer. Still one victim.']}
+],timeline:[
+{d:'Dec 25, 1996',e:'The Ramseys attend a Christmas party. JonBenét returns home and is put to bed.'},
+{d:'Dec 26, 5:52am',e:'Patsy Ramsey calls 911, reports finding a ransom note and that JonBenét is missing.'},
+{d:'Dec 26, morning',e:'Boulder PD fails to fully secure the scene. Family friends enter the home before investigators.'},
+{d:'Dec 26, 1:00pm',e:'John Ramsey and a family friend find JonBenét\'s body in the basement wine cellar.'},
+{d:'1997–1998',e:'Boulder PD and Ramsey attorneys clash publicly. Investigation stalls as focus stays on the family.'},
+{d:'1999',e:'Grand jury votes to indict John and Patsy Ramsey for child abuse resulting in death. DA declines to sign.'},
+{d:'2006',e:'Patsy Ramsey dies of ovarian cancer. John Mark Karr falsely confesses; DNA rules him out within days.'},
+{d:'2008',e:'DA Mary Lacy publicly exonerates the Ramseys based on new touch DNA from an unknown male.'},
+{d:'2013',e:'Grand jury indictment documents unsealed and released to the public.'},
+{d:'2019',e:'Burke Ramsey settles defamation lawsuit against CBS for an undisclosed amount.'}
+],questions:[
+'The DNA from an unknown male: has it been run through CODIS against all available databases, and what was the result?',
+'The ransom note is one of the longest in American history — written in the house, on Patsy\'s notepad, with her pen. Who could have written it?',
+'If the grand jury voted to indict, what information did DA Hunter have that led him to override their finding?',
+'Burke won a defamation settlement in 2019 — does that establish legal innocence, or simply that CBS couldn\'t prove its theory?',
+'If the intruder theory is correct, how did someone enter and exit a locked house undetected during a party-filled neighborhood on Christmas night?'
+]},
+'zodiac killer':{score:'8.8/10',sources:[
+{b:'bn',bt:'news',t:'Zodiac killer sends ciphered letters to three Bay Area newspapers',s:'"I like killing people because it is so much fun." The Zodiac\'s first letters, each containing one third of a 408-character cipher.',o:'San Francisco Chronicle',d:'Aug 1969',r:'97%'},
+{b:'bc',bt:'court',t:'SFPD Zodiac case files — partial release',s:'San Francisco Police Department cold case files including suspect interview records, forensic comparisons, and witness statements.',o:'SFPD Cold Case Unit',d:'2004',r:'95%'},
+{b:'bw',bt:'wiki',t:'Zodiac Killer — Wikipedia',s:'Comprehensive overview of confirmed attacks, victims, ciphers, suspects, and the investigation spanning five decades.',o:'Wikipedia',d:'Updated 2024',r:'92%'},
+{b:'bb',bt:'book',t:'Zodiac — Robert Graysmith',s:'The definitive popular account of the case that named Arthur Leigh Allen as the primary suspect and inspired the 2007 David Fincher film.',o:'St. Martin\'s Press',d:'1986',r:'89%'},
+{b:'bn',bt:'news',t:'Zodiac\'s 340-character cipher solved after 51 years',s:'A team of amateur codebreakers cracks the second Zodiac cipher, sent in 1969. The message contains no name or useful identifying information.',o:'San Francisco Chronicle',d:'Dec 2020',r:'86%'},
+{b:'bn',bt:'news',t:'Case Breakers claim to identify the Zodiac — FBI disputes it',s:'A team of retired investigators name Gary Francis Poste as the Zodiac Killer. The FBI says the case remains open and unsolved.',o:'USA Today',d:'Oct 2021',r:'82%'},
+{b:'bp',bt:'podcast',t:'Root of Evil — Zodiac deep dive series',s:'Multi-episode investigation into the Zodiac\'s confirmed victims, behavioral profile, and the strongest remaining suspect theories.',o:'Podcast',d:'2022',r:'77%'}
+],outline:[
+{n:1,name:'Cold open — the letter',tag:'Opening',time:'0:00–2:00',pts:['"I like killing people because it is so much fun." Typed on an ordinary typewriter. Sent to three newspapers simultaneously in the summer of 1969.','He called himself the Zodiac. He claimed 37 victims. Five were confirmed. The hunt has never ended.','Open with the question this episode will sit with: why did he stop signing his work?']},
+{n:2,name:'Background — Northern California, late 1960s',tag:'Context',time:'2:00–7:00',pts:['The hunting grounds: Benicia, Vallejo, Lake Berryessa, San Francisco. Lovers\' lanes and late nights.','Five confirmed victims. Possibly dozens more. The Zodiac\'s pattern: couples, remote locations, up close.','What the 1960s Bay Area looked like — and why the case was almost impossible to investigate with the tools of the time.']},
+{n:3,name:'The confirmed attacks',tag:'The case',time:'7:00–16:00',pts:['Dec 20, 1968: David Faraday and Betty Lou Jensen — the first confirmed Zodiac attack near Benicia.','Jul 4, 1969: Darlene Ferrin and Mike Mageau at Blue Rock Springs. Mageau survives and gives the only living description.','Sep 27, 1969: Bryan Hartnell and Cecelia Shepard at Lake Berryessa. He wore a hood with a cross. Cecelia dies two days later.','Oct 11, 1969: Cab driver Paul Stine in San Francisco\'s Presidio Heights. The last confirmed Zodiac kill.']},
+{n:4,name:'The ciphers — and what they reveal',tag:'Evidence',time:'16:00–22:00',pts:['Four encrypted messages sent to newspapers between 1969 and 1974. Two have now been solved.','The 408-cipher (solved 1969): "I will not give you my name because you will try to slow down or stop my collecting of slaves."','The 340-cipher (solved 2020, after 51 years): confirms authorship but contains no name or location.','Two ciphers remain unsolved. What investigators believe they may contain.']},
+{n:5,name:'The suspects',tag:'Investigation',time:'22:00–27:00',pts:['Arthur Leigh Allen: the primary suspect for 40 years. DNA did not match. Handwriting did not match. He died in 1992.','The Case Breakers\' 2021 theory: Gary Francis Poste, an Air Force veteran. The FBI disputes the identification.','Lawrence Kane and Richard Gaikowski: lesser-known but credible alternatives with strong geographic ties.','What investigators actually believe — and why no one has ever been charged.']},
+{n:6,name:'Why the Zodiac will never leave us',tag:'Legacy',time:'27:00–30:00',pts:['The letters stopped after 1974. The killings may have stopped — or he may have just stopped signing.','A cipher still unsolved. Five confirmed victims. A name never spoken in a courtroom.','Close: the Zodiac wanted an audience. Fifty years later, he still has one.']}
+],timeline:[
+{d:'Dec 20, 1968',e:'David Faraday and Betty Lou Jensen shot on Lake Herman Road near Benicia, CA. First attributed Zodiac attack.'},
+{d:'Jul 4, 1969',e:'Darlene Ferrin killed and Mike Mageau wounded at Blue Rock Springs, Vallejo. Zodiac calls police afterward.'},
+{d:'Aug 1, 1969',e:'First letters sent to SF Chronicle, Vallejo Times-Herald, and SF Examiner — each with one part of the 408-cipher.'},
+{d:'Aug 8, 1969',e:'408-cipher solved by a high school teacher and his wife. It contains no name.'},
+{d:'Sep 27, 1969',e:'Bryan Hartnell and Cecelia Shepard attacked at Lake Berryessa. Cecelia dies two days later.'},
+{d:'Oct 11, 1969',e:'Cab driver Paul Stine killed in San Francisco\'s Presidio Heights. Last confirmed Zodiac murder.'},
+{d:'1971–1974',e:'Zodiac sends final confirmed letters to newspapers. Killings attributed to Zodiac cease.'},
+{d:'1986',e:'Robert Graysmith publishes Zodiac, making Arthur Leigh Allen the primary suspect in the public imagination.'},
+{d:'Dec 2020',e:'International team of codebreakers solves the 340-character cipher. It contains no identifying information.'},
+{d:'Oct 2021',e:'Case Breakers name Gary Francis Poste as the Zodiac. FBI states the case remains open and unsolved.'}
+],questions:[
+'The 340-cipher was solved in 2020 but contained no identifying information — do the two remaining unsolved ciphers hold anything actionable?',
+'Arthur Leigh Allen died in 1992. Has any post-mortem DNA analysis ever matched his profile to the Zodiac\'s known DNA evidence?',
+'Why did the Zodiac letters stop after 1974? Did he die, enter prison, leave California, or simply evolve?',
+'Could the Zodiac have continued killing after 1974 without sending letters? What unsolved cases from the 1970s–80s share his behavioral profile?',
+'The Case Breakers identified Gary Francis Poste in 2021 — the FBI disputes it, but what specifically is their counter-evidence?'
+]},
+'scott peterson':{score:'7.9/10',sources:[
+{b:'bn',bt:'news',t:'Laci Peterson missing; husband Scott questioned by investigators',s:'Laci Peterson, 8 months pregnant, disappears from her Modesto home on Christmas Eve. Her husband says he was fishing alone 90 miles away.',o:'Modesto Bee',d:'Dec 2002',r:'96%'},
+{b:'bn',bt:'news',t:'Bodies of Laci and Connor Peterson recovered in San Francisco Bay',s:'The remains of Laci Peterson and her unborn son wash ashore in the bay near where Scott said he went fishing on December 24.',o:'Associated Press',d:'Apr 2003',r:'95%'},
+{b:'bc',bt:'court',t:'People v. Scott Peterson — trial transcripts and evidence summary',s:'Full trial record including Amber Frey testimony, forensic evidence, prosecution timeline, and defense arguments.',o:'Stanislaus County Superior Court',d:'2004',r:'93%'},
+{b:'bw',bt:'wiki',t:'Scott Peterson — Wikipedia',s:'Overview of the case, trial, conviction, death sentence, appeals, and ongoing claims of innocence.',o:'Wikipedia',d:'Updated 2024',r:'89%'},
+{b:'bn',bt:'news',t:'Amber Frey testifies — the affair that changed everything',s:'Laci\'s husband had told his mistress he was "not married." Her cooperation with investigators produced hundreds of recorded calls.',o:'Los Angeles Times',d:'Aug 2004',r:'87%'},
+{b:'bb',bt:'book',t:'For Laci — Sharon Rocha',s:'Laci\'s mother recounts the investigation, the trial, and the family\'s decades-long search for justice.',o:'Crown Publishers',d:'2006',r:'83%'},
+{b:'bp',bt:'podcast',t:'The Murder of Laci Peterson — A&E tie-in podcast',s:'Investigates claims of juror misconduct, alternate suspects, and Scott Peterson\'s ongoing appeals.',o:'Podcast',d:'2017',r:'78%'}
+],outline:[
+{n:1,name:'Cold open — Christmas Eve, 2002',tag:'Opening',time:'0:00–2:00',pts:['Modesto, California. Christmas Eve. A 27-year-old woman, eight months pregnant, steps out for a walk with her golden retriever.','She is never seen alive again. But her husband already knows.','Open with the line that haunts this case: he called his mother-in-law before he called police.']},
+{n:2,name:'Background — Laci, Scott, and the marriage',tag:'Context',time:'2:00–6:00',pts:['Laci Rocha Peterson: Modesto. Pregnant with Connor. Beloved by her community.','Scott Peterson: fertilizer salesman, charming, and secretly in a relationship with massage therapist Amber Frey.','He told Amber he was not married. He told her he had "lost his wife" — weeks before Laci went missing.']},
+{n:3,name:'The disappearance — and the timeline that never made sense',tag:'The case',time:'6:00–14:00',pts:['Christmas Eve. Scott says he drove 90 miles alone to go fishing in San Francisco Bay on a cold winter day.','When he returns, Laci is gone. He calls his mother-in-law first. Then a friend. Then police.','The search begins. Tip lines. Volunteers. Flyers. And a husband who gives press interviews and buys a new truck.','The neighbors, the dog, and the details investigators noticed immediately.']},
+{n:4,name:'The investigation — how Amber Frey broke the case',tag:'Investigation',time:'14:00–21:00',pts:['Amber Frey contacts police after seeing news coverage of the search. She has been dating Scott for weeks.','She agrees to cooperate. Investigators wire her phone. She continues the relationship while Scott lies on tape.','Recorded calls: Scott calling Amber from Paris on New Year\'s Eve. He was actually at a candlelight vigil for Laci in Modesto.','April 2003: Laci\'s torso and Connor\'s remains wash ashore less than a mile from where Scott went fishing.']},
+{n:5,name:'The trial — a circumstantial case',tag:'Trial',time:'21:00–27:00',pts:['No murder weapon. No eyewitnesses. No confession. The prosecution built entirely on circumstantial evidence.','Scott\'s behavior: the affair, the lies, fleeing toward Mexico with $15,000 in cash and his brother\'s ID when arrested.','The defense: it was someone else. Search dogs picked up a scent elsewhere. An alternate suspect was never fully investigated.','The jury: seven days of deliberations. Guilty on both counts.']},
+{n:6,name:'The conviction — and the questions that remain',tag:'Legacy',time:'27:00–30:00',pts:['Scott Peterson sentenced to death in 2005. California Supreme Court vacated the death sentence in 2020 due to juror misconduct.','He remains at San Quentin on life in prison. His legal team continues to file appeals challenging the conviction itself.','The case was entirely circumstantial. Was the jury deciding on evidence, or on character?','Close: Laci and Connor Peterson. Two victims. One conviction. And a case that still generates more questions than answers.']}
+],timeline:[
+{d:'Nov 2002',e:'Scott Peterson begins affair with massage therapist Amber Frey, telling her he is not married.'},
+{d:'Dec 9, 2002',e:'Scott tells Amber he has "lost his wife" — weeks before Laci goes missing.'},
+{d:'Dec 24, 2002',e:'Laci Peterson, 8 months pregnant, disappears from Modesto home. Scott claims to have been fishing at San Francisco Bay.'},
+{d:'Dec 25, 2002',e:'Laci reported missing. Modesto PD begins investigation. Scott gives press interviews.'},
+{d:'Jan 2003',e:'Amber Frey contacts police. She begins cooperating with investigators and recording her calls with Scott.'},
+{d:'Jan 2003',e:'Scott calls Amber from a "New Year\'s Eve celebration in Paris." He was at a candlelight vigil for Laci in Modesto.'},
+{d:'Apr 13–14, 2003',e:'Remains of Connor and a headless female torso (later Laci) discovered in San Francisco Bay near Scott\'s fishing spot.'},
+{d:'Apr 18, 2003',e:'Scott Peterson arrested near San Diego with $15,000 in cash, his brother\'s ID, and freshly dyed hair.'},
+{d:'Nov 3, 2004',e:'Jury finds Scott Peterson guilty of first-degree murder of Laci and second-degree murder of Connor.'},
+{d:'Mar 2005',e:'Scott Peterson sentenced to death at San Quentin State Prison.'},
+{d:'2020',e:'California Supreme Court vacates the death sentence due to juror misconduct during the penalty phase.'},
+{d:'2024',e:'Scott Peterson remains incarcerated. Appeals challenging the conviction itself continue.'}
+],questions:[
+'The prosecution never established how or where Laci was killed — does the absence of that core evidence still leave reasonable doubt?',
+'Scott\'s defense pointed to an alternate suspect and evidence dogs picked up a scent elsewhere on Christmas Day. Was that lead ever fully investigated?',
+'The California Supreme Court found juror misconduct in the penalty phase — could a similar challenge succeed against the conviction itself?',
+'Was the jury\'s decision driven by the evidence, or by Scott\'s behavior — the affair, the lies, the $15,000 in cash, the dyed hair?'
+]}
+};
+
+function getCase(n){
+  const k=n.toLowerCase().trim();
+  if(C[k])return C[k];
+  return{score:'7.6/10',sources:[
+    {b:'bn',bt:'news',t:`Breaking coverage: ${n} — initial reports`,s:`Early news coverage of the ${n} case, including initial police statements and witness accounts.`,o:'Associated Press',d:'2024',r:'94%'},
+    {b:'bw',bt:'wiki',t:`${n} — Wikipedia`,s:'Overview of the case, key figures, investigation timeline, and ongoing developments.',o:'Wikipedia',d:'Updated 2024',r:'91%'},
+    {b:'bc',bt:'court',t:`${n}: court filings and evidence summaries`,s:'Available public court documents, motions, and evidence exhibits from the official case record.',o:'Court Records',d:'2023–24',r:'88%'},
+    {b:'bn',bt:'news',t:`Investigators name persons of interest in ${n} case`,s:'Law enforcement releases updated information on suspects and evidence in the ongoing investigation.',o:'Local News',d:'2024',r:'85%'},
+    {b:'bb',bt:'book',t:`${n}: an investigative account`,s:'Long-form investigative piece examining the case from multiple angles with new interviews.',o:'The Atlantic',d:'2024',r:'80%'},
+    {b:'bp',bt:'podcast',t:`${n} — covered on Casefile True Crime`,s:'In-depth podcast episode covering the case timeline, suspects, and unanswered questions.',o:'Podcast',d:'2024',r:'75%'}
+  ],outline:[
+    {n:1,name:'Cold open — the hook',tag:'Opening',time:'0:00–2:00',pts:[`Open with the single most gripping moment in the ${n} case.`,'Make the listener feel the stakes before you give them context.','End the cold open with a question that won\'t be answered until the final act.']},
+    {n:2,name:'Background — setting the scene',tag:'Context',time:'2:00–7:00',pts:['Who are the key people? Ground the listener in time and place.','What was the context — community, relationships, circumstances — before the crime?','What did normal look like, just before everything changed?']},
+    {n:3,name:'The crime — what we know',tag:'The case',time:'7:00–15:00',pts:['Walk through the events chronologically but with narrative tension.','What physical evidence was found? What was missing?','First responders, early investigators — their initial read on the scene.']},
+    {n:4,name:'The investigation',tag:'Investigation',time:'15:00–23:00',pts:['Who did investigators look at first? Why?','Where did the case stall — and what reopened it?','Key turning points, new evidence, and the moments that changed everything.']},
+    {n:5,name:'Suspects and theories',tag:'Analysis',time:'23:00–28:00',pts:['Walk through each major suspect with evidence for and against.','What do investigators believe today vs. what the public believes?','If unsolved: what\'s the most credible theory and why?']},
+    {n:6,name:'Where it stands today',tag:'Legacy',time:'28:00–30:00',pts:['Current status of the case. Families. Impact on the community.','What would it take to solve it? What\'s still possible?','Close: bring it back to the opening question.']}
+  ],timeline:[
+    {d:'Year 1',e:`Initial incident. First responders called. ${n} case opened.`},
+    {d:'Week 1',e:'Investigation launched. Lead detectives assigned. Crime scene processed.'},
+    {d:'Month 1',e:'Persons of interest identified. Public tip line established.'},
+    {d:'Month 3',e:'Key evidence analyzed. Investigation narrows focus.'},
+    {d:'Year 2',e:'Case review conducted. New forensic techniques applied.'},
+    {d:'Present',e:'Case status: active. Families still seeking answers.'}
+  ],questions:[
+    `What is the single most important unanswered question in the ${n} case?`,
+    'Has modern forensic technology (genealogical DNA, digital records) been fully applied?',
+    'Who is the best possible guest for this episode — investigator, family member, or journalist?',
+    'Is there a geographic or behavioral angle connecting this case to others?',
+    'What does the community think today?'
+  ]};
+}
+
+let cur='';let curTab='outline';
+function sv(id){
+  ['land','load'].forEach(n=>document.getElementById('v-'+n).classList.remove('on'));
+  document.getElementById('v-res').classList.remove('on');
+  if(id==='res')document.getElementById('v-res').classList.add('on');
+  else document.getElementById('v-'+id).classList.add('on');
+}
+function startR(){
+  const v=document.getElementById('ci').value.trim();if(!v)return;
+  cur=v;document.getElementById('lcn').textContent=v;sv('load');runPipe(v);
+}
+const SR=['14 articles found','3 documents','Found','8 names identified','Complete'];
+function runPipe(cn){
+  for(let i=0;i<5;i++){const el=document.getElementById('s'+i);el.className='step';el.querySelector('.sring').innerHTML=`<span class="snum">${i+1}</span>`;document.getElementById('r'+i).textContent='';}
+  function go(i){
+    if(i>=5){populateRes(cn);setTimeout(()=>sv('res'),400);return;}
+    const el=document.getElementById('s'+i);el.className='step sa';el.querySelector('.sring').innerHTML='<div class="spin"></div>';
+    setTimeout(()=>{el.className='step sd';el.querySelector('.sring').innerHTML='<span style="font-size:11px;color:#0f0f0f">✓</span>';document.getElementById('r'+i).textContent=SR[i];go(i+1);},850+Math.random()*350);
+  }go(0);
+}
+function populateRes(cn){
+  const d=getCase(cn);
+  document.getElementById('rcn').textContent=cn;
+  document.getElementById('rmeta').textContent=`${d.sources.length} sources · outline ready`;
+  document.getElementById('score').textContent=`Score: ${d.score}`;
+  document.getElementById('exp-btn').onclick=()=>window.sendPrompt(`Export research brief for "${cn}" as a .docx`);
+  const sp=document.getElementById('src-panel');
+  sp.innerHTML='<div class="ph"><div class="plbl">Sources found</div><div class="plbl">'+d.sources.length+' total</div></div>';
+  d.sources.forEach(s=>{const c=document.createElement('div');c.className='sc';c.innerHTML=`<div class="stop"><span class="bdg ${s.b}">${s.bt}</span><span class="srel">${s.r}</span></div><div class="stitle">${s.t}</div><div class="ssnip">${s.s}</div><div class="sfoot"><span class="soutlet">${s.o}</span><span class="sdate">${s.d}</span></div>`;sp.appendChild(c);});
+  curTab='outline';document.querySelectorAll('.otab').forEach((t,i)=>t.classList.toggle('on',i===0));renderTab(d,'outline');
+}
+function renderTab(d,tab){
+  const oc=document.getElementById('out-content');oc.innerHTML='';
+  if(tab==='outline'){
+    d.outline.forEach((sec,i)=>{const div=document.createElement('div');div.className='sec'+(i===0?' open':'');const pts=sec.pts.map(p=>`<div class="tp"><div class="tpdot"></div><div>${p}</div></div>`).join('');div.innerHTML=`<div class="shdr" onclick="this.parentElement.classList.toggle('open')"><div class="sn">${sec.n}</div><div class="sl"><div class="sname">${sec.name}</div><div class="stag">${sec.tag}</div></div><div class="stime">${sec.time}</div><div class="sarr">&#9654;</div></div><div class="sbody">${pts}</div>`;oc.appendChild(div);});
+  }else if(tab==='timeline'){
+    const div=document.createElement('div');div.className='sec open';const rows=d.timeline.map(t=>`<div class="trow"><div class="td">${t.d}</div><div class="te">${t.e}</div></div>`).join('');div.innerHTML=`<div class="shdr"><div class="sl"><div class="sname">Case timeline</div></div></div><div class="sbody" style="display:block">${rows}</div>`;oc.appendChild(div);
+  }else{
+    const div=document.createElement('div');div.className='sec open';const qs=d.questions.map(q=>`<div class="oq">${q}</div>`).join('');div.innerHTML=`<div class="shdr"><div class="sl"><div class="sname">Open questions to investigate</div></div></div><div class="sbody" style="display:block">${qs}</div>`;oc.appendChild(div);
+  }
+}
+document.getElementById('go-btn').addEventListener('click',startR);
+document.getElementById('ci').addEventListener('keydown',e=>{if(e.key==='Enter')startR();});
+document.getElementById('back-btn').addEventListener('click',()=>sv('land'));
+document.querySelectorAll('.si[data-case]').forEach(el=>{
+  el.addEventListener('click',()=>{const cn=el.dataset.case;document.getElementById('ci').value=cn;cur=cn;document.querySelectorAll('.si').forEach(s=>s.classList.remove('on'));el.classList.add('on');populateRes(cn);sv('res');});
+});
+document.querySelectorAll('.rchip[data-qs]').forEach(el=>{el.addEventListener('click',()=>{document.getElementById('ci').value=el.dataset.qs;startR();});});
+document.querySelectorAll('.chip').forEach(el=>{el.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');});});
+document.querySelectorAll('.otab').forEach(el=>{el.addEventListener('click',()=>{document.querySelectorAll('.otab').forEach(t=>t.classList.remove('on'));el.classList.add('on');curTab=el.dataset.tab;renderTab(getCase(cur||'Amy Mihaljevic'),curTab);});});
+sv('land');
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "test_cases": [
+    {
+      "name": "Basic True Crime Script",
+      "domain": "true_crime",
+      "input": "In 1985, John Doe disappeared from Columbus, Ohio. Police said he was likely abducted. The case went cold for 30 years. In 2015, DNA evidence linked a suspect to the crime. According to investigators, the perpetrator was arrested in Chicago. This groundbreaking discovery solved a decades-old mystery.",
+      "expected_outputs": [
+        "1985 — date flagged for verification",
+        "Columbus, Ohio — location verified",
+        "30 years — timespan calculation checked",
+        "2015 — date flagged for verification",
+        "Voice audit: check for tone consistency"
+      ]
+    },
+    {
+      "name": "Script with Forbidden Words",
+      "domain": "true_crime",
+      "input": "This robust case delves into the landscape of unsolved crimes. The testament to their hard work is important to note. Furthermore, the investigation represents a transformative moment in forensics.",
+      "expected_outputs": [
+        "Forbidden words detected: robust, delves, landscape, testament, important to note, Furthermore, transformative",
+        "High voice consistency issues"
+      ]
+    },
+    {
+      "name": "Script with Narrative Gaps",
+      "domain": "true_crime",
+      "input": "Sarah disappeared. Therefore, police launched an investigation. The case went cold because new leads were exhausted quickly. It's important to note the psychological impact on her family.",
+      "expected_outputs": [
+        "Unexplained name: Sarah",
+        "Logical gap: 'Therefore' appears without sufficient prior setup",
+        "Forbidden phrase detected: It's important to note"
+      ]
+    },
+    {
+      "name": "Marketing Copy",
+      "domain": "marketing",
+      "input": "Founded in 2020, TechCorp has grown to serve over 50,000 customers across North America. Our platform processes 10 million transactions daily. The company was awarded Best Innovation in 2023. Revenue grew 200% year-over-year.",
+      "expected_outputs": [
+        "2020 — founding date verification",
+        "50,000 customers — statistic flagged",
+        "10 million transactions — metric flagged",
+        "2023 — award date flagged",
+        "200% growth — statistics verified"
+      ]
+    }
+  ]
+}

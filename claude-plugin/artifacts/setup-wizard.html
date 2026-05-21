@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Setup Wizard",
+  "schemaVersion": 1
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Podcast Dashboard Suite — Setup</title>
+<style>
+:root { color-scheme: light; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background:#0f0f0f; color:#f0ece3; font-family:Georgia,'Times New Roman',serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:40px 24px; }
+
+/* Progress bar */
+.progress { display:flex; align-items:center; gap:0; margin-bottom:48px; width:100%; max-width:480px; }
+.prog-step { display:flex; align-items:center; gap:8px; flex:1; }
+.prog-dot { width:24px; height:24px; border-radius:50%; border:1px solid #333; background:#0f0f0f; display:flex; align-items:center; justify-content:center; font-size:10px; font-family:'Courier New',monospace; color:#444; flex-shrink:0; transition:all .3s; }
+.prog-dot.active  { border-color:#c9a84c; color:#c9a84c; }
+.prog-dot.done    { border-color:#5aab7d; background:#5aab7d; color:#0f0f0f; }
+.prog-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; font-family:'Courier New',monospace; color:#444; transition:color .3s; }
+.prog-label.active { color:#c9a84c; }
+.prog-label.done   { color:#5aab7d; }
+.prog-line { height:1px; background:#1e1e1e; flex:1; margin:0 8px; }
+.prog-line.done { background:#5aab7d; }
+
+/* Screens */
+.screen { display:none; width:100%; max-width:600px; animation:fadeIn .3s ease; }
+.screen.active { display:block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* Welcome screen */
+.suite-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#c9a84c; font-family:'Courier New',monospace; margin-bottom:12px; text-align:center; }
+.suite-title { font-size:34px; font-weight:normal; text-align:center; margin-bottom:8px; }
+.suite-sub   { font-size:14px; color:#666; text-align:center; margin-bottom:40px; font-family:'Courier New',monospace; letter-spacing:.5px; }
+
+.feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:36px; }
+.feature-card { background:#171717; border:1px solid #242424; border-radius:4px; padding:20px 18px; }
+.feature-icon { font-size:20px; margin-bottom:10px; }
+.feature-name { font-size:13px; color:#f0ece3; margin-bottom:6px; }
+.feature-desc { font-size:11px; color:#555; font-family:'Courier New',monospace; line-height:1.5; }
+
+/* Form screen */
+.form-title { font-size:24px; font-weight:normal; margin-bottom:6px; }
+.form-sub    { font-size:12px; color:#555; font-family:'Courier New',monospace; letter-spacing:.5px; margin-bottom:32px; }
+.field       { margin-bottom:22px; }
+.field label { display:block; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:#555; font-family:'Courier New',monospace; margin-bottom:8px; }
+.field input  { width:100%; background:#171717; border:1px solid #2a2a2a; border-radius:3px; color:#f0ece3; font-family:Georgia,serif; font-size:15px; padding:12px 14px; outline:none; transition:border-color .2s; }
+.field input:focus { border-color:#c9a84c; }
+.field input::placeholder { color:#333; }
+.field-hint  { font-size:10px; color:#444; font-family:'Courier New',monospace; margin-top:6px; }
+
+/* Creating screen */
+.creating-title { font-size:22px; font-weight:normal; margin-bottom:8px; }
+.creating-sub   { font-size:12px; color:#555; font-family:'Courier New',monospace; margin-bottom:32px; }
+.progress-steps { display:flex; flex-direction:column; gap:10px; margin-bottom:32px; }
+.pstep { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#171717; border:1px solid #242424; border-radius:3px; }
+.pstep-icon { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }
+.pstep-text { font-size:12px; font-family:'Courier New',monospace; color:#555; }
+.pstep.active .pstep-text { color:#c9a84c; }
+.pstep.done   .pstep-text { color:#5aab7d; }
+.pstep.error  .pstep-text { color:#c05454; }
+
+.spinner-sm { display:inline-block; width:14px; height:14px; border:2px solid #2a2a2a; border-top-color:#c9a84c; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Done screen */
+.done-icon  { font-size:40px; margin-bottom:16px; text-align:center; }
+.done-title { font-size:26px; font-weight:normal; text-align:center; margin-bottom:8px; }
+.done-sub   { font-size:12px; color:#555; font-family:'Courier New',monospace; text-align:center; margin-bottom:32px; }
+.done-cards { display:flex; flex-direction:column; gap:10px; margin-bottom:28px; }
+.done-card  { background:#171717; border:1px solid #242424; border-radius:4px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.done-card-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#555; font-family:'Courier New',monospace; margin-bottom:4px; }
+.done-card-name  { font-size:14px; color:#f0ece3; }
+.done-card-link  { font-size:11px; color:#c9a84c; font-family:'Courier New',monospace; text-decoration:none; border:1px solid rgba(201,168,76,.3); padding:4px 10px; border-radius:2px; white-space:nowrap; }
+.done-card-link:hover { background:rgba(201,168,76,.08); }
+.done-card.sheet { border-left:3px solid #c9a84c; }
+.done-card.tracker { border-left:3px solid #d4883a; }
+.done-card.performance { border-left:3px solid #5aab7d; }
+
+.tip-box { background:#141414; border:1px solid #1e1e1e; border-radius:3px; padding:14px 16px; }
+.tip-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#444; font-family:'Courier New',monospace; margin-bottom:8px; }
+.tip-text  { font-size:12px; color:#555; font-family:'Courier New',monospace; line-height:1.7; }
+
+/* Buttons */
+.btn-primary { width:100%; background:#c9a84c; border:none; border-radius:3px; color:#0f0f0f; cursor:pointer; font-family:Georgia,serif; font-size:14px; letter-spacing:.5px; padding:14px 24px; text-transform:none; transition:opacity .15s; margin-top:8px; }
+.btn-primary:hover { opacity:.88; }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+.btn-ghost { background:transparent; border:1px solid #2a2a2a; border-radius:3px; color:#555; cursor:pointer; font-family:'Courier New',monospace; font-size:11px; letter-spacing:1px; padding:8px 16px; text-transform:uppercase; transition:all .15s; margin-top:10px; }
+.btn-ghost:hover { border-color:#444; color:#888; }
+
+.error-msg { background:rgba(192,84,84,.1); border:1px solid rgba(192,84,84,.25); border-radius:3px; color:#c05454; font-family:'Courier New',monospace; font-size:12px; padding:12px 14px; margin-top:16px; display:none; }
+</style>
+</head>
+<body>
+
+<!-- Progress indicator -->
+<div class="progress" id="progress-bar">
+  <div class="prog-step">
+    <div class="prog-dot active" id="dot-1">1</div>
+    <span class="prog-label active" id="lbl-1">Setup</span>
+  </div>
+  <div class="prog-line" id="line-1"></div>
+  <div class="prog-step">
+    <div class="prog-dot" id="dot-2">2</div>
+    <span class="prog-label" id="lbl-2">Create</span>
+  </div>
+  <div class="prog-line" id="line-2"></div>
+  <div class="prog-step">
+    <div class="prog-dot" id="dot-3">3</div>
+    <span class="prog-label" id="lbl-3">Launch</span>
+  </div>
+</div>
+
+<!-- Screen: Welcome -->
+<div id="screen-welcome" class="screen active">
+  <div class="suite-label">Podcast Dashboard Suite</div>
+  <div class="suite-title">Your show's operating system.</div>
+  <div class="suite-sub">Two live dashboards. One Google Sheet. Everything updates automatically.</div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">💰</div>
+      <div class="feature-name">Sponsorship Tracker</div>
+      <div class="feature-desc">Every deal, deadline, and invoice in one place. Never miss a read.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <div class="feature-name">Episode Performance</div>
+      <div class="feature-desc">Downloads per episode, vs-average indicators, trend chart.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚠️</div>
+      <div class="feature-name">Content Gap Alerts</div>
+      <div class="feature-desc">Flags high-performing episodes with no repurposed content.</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="showScreen('info')">Get Started →</button>
+</div>
+
+<!-- Screen: Show Info -->
+<div id="screen-info" class="screen">
+  <div class="form-title">Tell us about your show.</div>
+  <div class="form-sub">We'll create a Google Sheet configured for your podcast.</div>
+  <div class="field">
+    <label>Show Name</label>
+    <input type="text" id="input-show-name" placeholder="Who Killed…?" maxlength="80">
+  </div>
+  <div class="field">
+    <label>Season / Series Label <span style="color:#333">(optional)</span></label>
+    <input type="text" id="input-season" placeholder="Season 3" maxlength="40">
+    <div class="field-hint">Shown in the dashboard header. Leave blank if you don't use seasons.</div>
+  </div>
+  <button class="btn-primary" id="btn-create" onclick="startCreate()">Create My Google Sheet →</button>
+  <div class="error-msg" id="create-error"></div>
+</div>
+
+<!-- Screen: Creating -->
+<div id="screen-creating" class="screen">
+  <div class="creating-title">Setting up your dashboards…</div>
+  <div class="creating-sub">This takes about 10 seconds. Hang tight.</div>
+  <div class="progress-steps">
+    <div class="pstep" id="pstep-1">
+      <div class="pstep-icon" id="pstep-1-icon">○</div>
+      <div class="pstep-text">Creating your Google Sheet</div>
+    </div>
+    <div class="pstep" id="pstep-2">
+      <div class="pstep-icon" id="pstep-2-icon">○</div>
+      <div class="pstep-text">Adding Episodes tab</div>
+    </div>
+    <div class="pstep" id="pstep-3">
+      <div class="pstep-icon" id="pstep-3-icon">○</div>
+      <div class="pstep-text">Saving your configuration</div>
+    </div>
+  </div>
+</div>
+
+<!-- Screen: Done -->
+<div id="screen-done" class="screen">
+  <div class="done-icon">✓</div>
+  <div class="done-title">You're all set.</div>
+  <div class="done-sub" id="done-sub">Your dashboards are ready and pulling live from your sheet.</div>
+  <div class="done-cards">
+    <div class="done-card sheet">
+      <div>
+        <div class="done-card-label">Your Google Sheet</div>
+        <div class="done-card-name" id="done-sheet-name">Podcast Dashboard</div>
+      </div>
+      <a id="done-sheet-link" href="#" target="_blank" class="done-card-link">Open Sheet ↗</a>
+    </div>
+    <div class="done-card tracker">
+      <div>
+        <div class="done-card-label">Dashboard 1</div>
+        <div class="done-card-name">Sponsorship Tracker</div>
+      </div>
+      <span class="done-card-link" style="cursor:default;opacity:.5">Open in Cowork</span>
+    </div>
+    <div class="done-card performance">
+      <div>
+        <div class="done-card-label">Dashboard 2</div>
+        <div class="done-card-name">Episode Performance</div>
+      </div>
+      <span class="done-card-link" style="cursor:default;opacity:.5">Open in Cowork</span>
+    </div>
+  </div>
+  <div class="tip-box">
+    <div class="tip-label">Next steps</div>
+    <div class="tip-text">
+      1. Open your Google Sheet and start filling in your real data.<br>
+      2. Sheet1 = sponsorship deals &nbsp;·&nbsp; Episodes tab = download stats.<br>
+      3. Open either dashboard — it'll pull your data automatically.<br>
+      4. Status values: <strong style="color:#888">upcoming · overdue · completed</strong><br>
+      5. Repurposed values: <strong style="color:#888">full · partial · none</strong>
+    </div>
+  </div>
+</div>
+
+<script>
+const SHEET_TOOL    = 'mcp__8935aad1-1da9-45a2-9cb4-f22ab8e10861__google_sheets_create_spreadsheet';
+const WS_TOOL       = 'mcp__8935aad1-1da9-45a2-9cb4-f22ab8e10861__google_sheets_create_worksheet';
+const STORAGE_ID    = 'podcastDashboardSheetId';
+const STORAGE_NAME  = 'podcastDashboardShowName';
+const STORAGE_LABEL = 'podcastDashboardSeasonLabel';
+
+let currentScreen = 'welcome';
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  currentScreen = name;
+  updateProgress(name);
+}
+
+function updateProgress(name) {
+  const step = { welcome:1, info:1, creating:2, done:3 }[name] || 1;
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot-' + i);
+    const lbl = document.getElementById('lbl-' + i);
+    const line = document.getElementById('line-' + i);
+    dot.className = 'prog-dot' + (i < step ? ' done' : i === step ? ' active' : '');
+    lbl.className = 'prog-label' + (i < step ? ' done' : i === step ? ' active' : '');
+    dot.textContent = i < step ? '✓' : i;
+    if (line) line.className = 'prog-line' + (i < step ? ' done' : '');
+  }
+}
+
+function setPstep(n, state) {
+  const el   = document.getElementById('pstep-' + n);
+  const icon = document.getElementById('pstep-' + n + '-icon');
+  el.className = 'pstep ' + state;
+  if (state === 'active') icon.innerHTML = '<span class="spinner-sm"></span>';
+  else if (state === 'done')  icon.textContent = '✓';
+  else if (state === 'error') icon.textContent = '✕';
+  else icon.textContent = '○';
+}
+
+async function startCreate() {
+  const showName   = document.getElementById('input-show-name').value.trim();
+  const seasonLabel = document.getElementById('input-season').value.trim();
+  if (!showName) {
+    document.getElementById('input-show-name').focus();
+    return;
+  }
+
+  document.getElementById('btn-create').disabled = true;
+  showScreen('creating');
+
+  try {
+    // Step 1: Create spreadsheet
+    setPstep(1, 'active');
+    const sheetTitle = showName + ' — Podcast Dashboard';
+    const createRes = await window.cowork.callMcpTool(SHEET_TOOL, {
+      instructions: 'Create a spreadsheet titled "' + sheetTitle + '" for tracking podcast sponsorship deals with these column headers: Company, Type, Episode, Episode Title, Air Date, Status, Rate, Invoice, Note',
+      title: sheetTitle,
+      headers: ['Company','Type','Episode','Episode Title','Air Date','Status','Rate','Invoice','Note'],
+      output_hint: 'spreadsheet ID and URL'
+    });
+
+    const sheetId  = createRes?.results?.spreadsheet_id || createRes?.spreadsheet_id;
+    const sheetUrl = createRes?.results?.url || createRes?.url || '#';
+    if (!sheetId) throw new Error('Could not retrieve spreadsheet ID from response.');
+    setPstep(1, 'done');
+
+    // Step 2: Create Episodes worksheet
+    setPstep(2, 'active');
+    await window.cowork.callMcpTool(WS_TOOL, {
+      instructions: 'Create a new worksheet called "Episodes" in the spreadsheet for tracking episode download performance',
+      spreadsheet: sheetId,
+      title: 'Episodes',
+      headers: ['Episode Number','Title','Published','Downloads','Repurposed','Missing'],
+      output_hint: 'worksheet creation confirmation'
+    });
+    setPstep(2, 'done');
+
+    // Step 3: Save to localStorage
+    setPstep(3, 'active');
+    await new Promise(r => setTimeout(r, 400));
+    localStorage.setItem(STORAGE_ID, sheetId);
+    localStorage.setItem(STORAGE_NAME, showName);
+    localStorage.setItem(STORAGE_LABEL, seasonLabel || '');
+    setPstep(3, 'done');
+
+    // Done
+    await new Promise(r => setTimeout(r, 600));
+    document.getElementById('done-sheet-name').textContent = sheetTitle;
+    document.getElementById('done-sheet-link').href = sheetUrl;
+    document.getElementById('done-sub').textContent =
+      'Your dashboards are configured for ' + showName + '. Open your sheet to add data.';
+    showScreen('done');
+
+  } catch(e) {
+    setPstep(1, 'error');
+    const detail = e && e.message ? e.message : String(e);
+    const isConnErr = /tool|mcp|network|fetch|undefined|null|not found/i.test(detail) || !detail || detail === 'undefined';
+    const errEl = document.getElementById('create-error');
+    errEl.innerHTML = isConnErr
+      ? '⚠ Google Sheets connector unavailable — reconnect it in Cowork settings, then try again.<br><span style="font-size:10px;color:#555">(' + detail + ')</span>'
+      : '⚠ Setup failed: ' + detail + '<br><span style="font-size:10px;color:#555">Check that your Google Sheets connector is active and try again.</span>';
+    errEl.style.display = 'block';
+    document.getElementById('btn-create').disabled = false;
+    showScreen('info');
+  }
+}
+
+// If already configured, skip to done
+window.addEventListener('load', () => {
+  const existing = localStorage.getItem(STORAGE_ID);
+  if (existing) {
+    const name = localStorage.getItem(STORAGE_NAME) || 'Your Show';
+    document.getElementById('done-sheet-name').textContent = name + ' — Podcast Dashboard';
+    document.getElementById('done-sub').textContent = 'Already configured for ' + name + '. Update your sheet to change dashboards.';
+    showScreen('done');
+  }
+});
+</script>
+</body>
+</html>

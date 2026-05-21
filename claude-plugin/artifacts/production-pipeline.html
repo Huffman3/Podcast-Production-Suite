@@ -1,0 +1,1064 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Production Pipeline",
+  "schemaVersion": 1,
+  "description": "Case production pipeline for Who Killed…? — tracks every case from Discovery through Published across 8 stages. Each case has an expandable ▼ Outline panel with 5 sections (Cold Open Hook, Timeline, Suspect Profiles, Episode Structure, Production Notes). Cases with outlines show a ✦ badge. Data stored in localStorage (wkPipeline key), shared with the Suite Hub card."
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Pipeline — Who Killed…?</title>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0f0f0f;
+  color: #f0ece3;
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+}
+
+/* ── Hero ── */
+.hero {
+  padding: 40px 28px 32px;
+  border-bottom: 1px solid #1e1e1e;
+  background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%);
+}
+.hero-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 10px;
+}
+.hero-title {
+  font-size: 26px;
+  color: #f0ece3;
+  letter-spacing: -0.01em;
+  margin-bottom: 5px;
+  line-height: 1.2;
+}
+.hero-title em { color: #c9a84c; font-style: normal; }
+.hero-sub {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #555;
+  letter-spacing: 0.03em;
+}
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.hero-stat { display: flex; flex-direction: column; gap: 3px; }
+.hero-stat-val {
+  font-size: 24px;
+  color: #f0ece3;
+  letter-spacing: -0.02em;
+}
+.hero-stat-val.gold   { color: #c9a84c; }
+.hero-stat-val.blue   { color: #4a7fc1; }
+.hero-stat-val.green  { color: #5aab7d; }
+.hero-stat-val.muted  { color: #555; }
+.hero-stat-lbl {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #555;
+}
+.hero-divider { width: 1px; height: 32px; background: #242424; }
+
+/* ── Stage tabs ── */
+.tabs-wrap {
+  border-bottom: 1px solid #1e1e1e;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tabs-row {
+  display: flex;
+  padding: 0 28px;
+  min-width: max-content;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #555;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 14px 14px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tab-btn:hover { color: #888; }
+.tab-btn.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+.tab-count {
+  background: #1e1e1e;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  min-width: 18px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+.tab-btn.active .tab-count { background: #3a2a00; color: #c9a84c; }
+
+/* ── Content ── */
+.content { padding: 24px 28px 40px; }
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.section-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #444;
+}
+.add-btn {
+  background: #1a1400;
+  border: 1px solid #3a2a00;
+  color: #c9a84c;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 7px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.add-btn:hover { background: #251e00; border-color: #c9a84c; }
+
+/* ── Add form ── */
+.add-form {
+  background: #131313;
+  border: 1px solid #2a2a2a;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: none;
+}
+.add-form.open { display: block; }
+.form-eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 14px;
+}
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 130px; }
+.form-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #555;
+}
+.form-input, .form-select, .form-textarea {
+  background: #0f0f0f;
+  border: 1px solid #242424;
+  color: #f0ece3;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #c9a84c44; outline: 1px solid #c9a84c44; }
+.form-textarea { resize: vertical; min-height: 64px; }
+.form-select option { background: #1a1a1a; }
+.form-actions { display: flex; gap: 10px; margin-top: 6px; }
+.btn-primary {
+  background: #c9a84c;
+  border: none;
+  color: #0f0f0f;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 8px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: #d4b55e; }
+.btn-ghost {
+  background: none;
+  border: 1px solid #2a2a2a;
+  color: #555;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 8px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-ghost:hover { border-color: #444; color: #888; }
+
+/* ── Cases list ── */
+.cases-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Case wrapper ── */
+.case-wrapper { display: flex; flex-direction: column; }
+
+/* ── Case row ── */
+.case-row {
+  background: #131313;
+  border: 1px solid #1e1e1e;
+  border-radius: 4px 4px 0 0;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.case-row.outline-closed { border-radius: 4px; }
+.case-row:hover { border-color: #2a2a2a; background: #161616; }
+.case-icon { font-size: 16px; line-height: 1; margin-top: 3px; flex-shrink: 0; opacity: 0.85; }
+.case-body { flex: 1; min-width: 0; }
+.case-title {
+  font-size: 15px;
+  color: #f0ece3;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.case-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stage-badge {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+.outline-badge {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid #1e3a20;
+  background: #0e2410;
+  color: #5aab7d;
+}
+.case-loc {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #555;
+}
+.case-age {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #3a3a3a;
+}
+.case-notes {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #505050;
+  margin-top: 7px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.case-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.act {
+  background: none;
+  border: 1px solid #1e1e1e;
+  color: #4a4a4a;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  padding: 4px 9px;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.14s;
+}
+.act:hover { border-color: #3a3a3a; color: #888; }
+.act.fwd  { border-color: #2a2000; color: #c9a84c; }
+.act.fwd:hover { background: #1a1400; border-color: #c9a84c; }
+.act.pub  { border-color: #1e4434; color: #5aab7d; }
+.act.pub:hover { background: #0e2a1e; }
+.act.del:hover { color: #c0504c; border-color: #c0504c44; }
+.act.restore { border-color: #2a2000; color: #c9a84c; }
+.act.restore:hover { background: #1a1400; }
+.act.outline-act { border-color: #1e3050; color: #4a7fc1; }
+.act.outline-act:hover { background: #0e1f33; border-color: #4a7fc1; }
+.act.outline-act.open { background: #0e1f33; border-color: #4a7fc1; color: #6a9fd1; }
+
+/* ── Outline panel ── */
+.outline-panel {
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  overflow: hidden;
+}
+.outline-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  border-bottom: 1px solid #181818;
+  background: #111;
+}
+.outline-panel-title {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a7fc1;
+}
+.outline-panel-meta {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #3a3a3a;
+  letter-spacing: 0.04em;
+}
+.outline-edit-btn {
+  background: none;
+  border: 1px solid #1e3050;
+  color: #4a7fc1;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.14s;
+}
+.outline-edit-btn:hover { background: #0e1f33; border-color: #4a7fc1; }
+
+.outline-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.outline-section {
+  padding: 14px 18px;
+  border-right: 1px solid #181818;
+  border-bottom: 1px solid #181818;
+}
+.outline-section:nth-child(even) { border-right: none; }
+.outline-section:nth-last-child(-n+2) { border-bottom: none; }
+.outline-section.full-width {
+  grid-column: 1 / -1;
+  border-right: none;
+}
+.outline-section-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #444;
+  margin-bottom: 8px;
+}
+.outline-section-body {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.outline-empty {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #2e2e2e;
+  font-style: italic;
+}
+.outline-prompt {
+  grid-column: 1 / -1;
+  padding: 20px 18px;
+  text-align: center;
+  border-top: 1px solid #181818;
+}
+.outline-prompt-text {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #333;
+  letter-spacing: 0.03em;
+}
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 52px 20px;
+}
+.empty-icon { font-size: 30px; margin-bottom: 14px; opacity: 0.25; }
+.empty-msg {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #3a3a3a;
+  letter-spacing: 0.04em;
+}
+
+/* ── Edit modal ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: #181818;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal.wide { max-width: 640px; }
+.modal-title {
+  font-size: 17px;
+  color: #f0ece3;
+  margin-bottom: 4px;
+}
+.modal-sub {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: #444;
+  margin-bottom: 20px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 620px) {
+  .hero { padding: 28px 18px 24px; }
+  .content { padding: 18px 18px 32px; }
+  .tabs-row { padding: 0 18px; }
+  .hero-stats { gap: 18px; }
+  .case-actions { flex-direction: column; align-items: flex-end; min-width: 80px; }
+  .outline-sections { grid-template-columns: 1fr; }
+  .outline-section { border-right: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Who Killed…? · Slo Burn Media</div>
+  <div class="hero-title"><em>Production Pipeline</em></div>
+  <div class="hero-sub">Case tracking · Discovery through publish</div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-val gold" id="sActive">—</div>
+      <div class="hero-stat-lbl">Active Cases</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val blue" id="sScripting">—</div>
+      <div class="hero-stat-lbl">In Scripting</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val" id="sRecording">—</div>
+      <div class="hero-stat-lbl">Ready to Record</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val green" id="sPublished">—</div>
+      <div class="hero-stat-lbl">Published</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val blue" id="sOutlined">—</div>
+      <div class="hero-stat-lbl">Outlined</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <div class="hero-stat-val muted" id="sShelved">—</div>
+      <div class="hero-stat-lbl">Shelved</div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage tabs -->
+<div class="tabs-wrap">
+  <div class="tabs-row" id="tabsRow"></div>
+</div>
+
+<!-- Content -->
+<div class="content">
+  <div class="top-bar">
+    <div class="section-label" id="sectionLabel">All Cases</div>
+    <button class="add-btn" id="addToggleBtn" onclick="toggleForm()">+ Add Case</button>
+  </div>
+
+  <!-- Add form -->
+  <div class="add-form" id="addForm">
+    <div class="form-eyebrow">New Case</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;min-width:200px">
+        <label class="form-label">Case / Episode Title *</label>
+        <input class="form-input" id="nTitle" placeholder="e.g. The Murder of Jane Doe" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Stage</label>
+        <select class="form-select" id="nStage"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="nLocation" placeholder="City, State" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year of Crime</label>
+        <input class="form-input" id="nYear" placeholder="e.g. 1989" maxlength="4" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Notes / Angle</label>
+        <textarea class="form-textarea" id="nNotes" placeholder="Episode angle, potential guests, research sources…"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="addCase()">Add to Pipeline</button>
+      <button class="btn-ghost" onclick="toggleForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Cases -->
+  <div class="cases-list" id="casesList"></div>
+</div>
+
+<!-- Edit modal -->
+<div class="overlay" id="editOverlay" onclick="overlayClick(event,'editOverlay')">
+  <div class="modal">
+    <div class="modal-title">Edit Case</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Title</label>
+        <input class="form-input" id="eTitle" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Stage</label>
+        <select class="form-select" id="eStage"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="eLocation" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Year</label>
+        <input class="form-input" id="eYear" maxlength="4" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Notes / Angle</label>
+        <textarea class="form-textarea" id="eNotes"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+      <button class="btn-ghost" onclick="closeEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Outline edit modal -->
+<div class="overlay" id="outlineOverlay" onclick="overlayClick(event,'outlineOverlay')">
+  <div class="modal wide">
+    <div class="modal-title" id="outlineModalTitle">Edit Outline</div>
+    <div class="modal-sub" id="outlineModalSub">Paste or type outline content. Claude can generate this via the show-outline-skill.</div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Cold Open Hook</label>
+        <textarea class="form-textarea" id="oColdOpen" placeholder="1–2 sentence attention-grabber…" style="min-height:72px"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Case Timeline</label>
+        <textarea class="form-textarea" id="oTimeline" placeholder="Chronological events…" style="min-height:80px"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Suspect Profiles</label>
+        <textarea class="form-textarea" id="oSuspects" placeholder="Key persons of interest…" style="min-height:72px"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Episode Structure</label>
+        <textarea class="form-textarea" id="oStructure" placeholder="Act breaks, segments…" style="min-height:72px"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1">
+        <label class="form-label">Production Notes</label>
+        <textarea class="form-textarea" id="oProduction" placeholder="Pacing guidance, audio cues, narrative tips…" style="min-height:64px"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveOutlineEdit()">Save Outline</button>
+      <button class="btn-ghost" onclick="closeOutlineEdit()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const KEY = 'wkPipeline';
+
+const STAGES = ['Discovery','Research','Outline','Scripting','Recording','Editing','Published','Shelved'];
+const ACTIVE  = ['Discovery','Research','Outline','Scripting','Recording','Editing'];
+
+const ICON = {
+  Discovery:'🔍', Research:'📋', Outline:'📝',
+  Scripting:'✍️', Recording:'🎙', Editing:'✂️',
+  Published:'✅', Shelved:'🗄'
+};
+
+const BADGE = {
+  Discovery:  'color:#666;border-color:#333;background:#161616',
+  Research:   'color:#4a7fc1;border-color:#1e3050;background:#0e1f33',
+  Outline:    'color:#c9a84c;border-color:#3a2a00;background:#1a1400',
+  Scripting:  'color:#c9a84c;border-color:#3a2a00;background:#1a1400',
+  Recording:  'color:#5aab7d;border-color:#1e4434;background:#0e2a1e',
+  Editing:    'color:#5aab7d;border-color:#1e4434;background:#0e2a1e',
+  Published:  'color:#5aab7d;border-color:#1e4434;background:#0e2a1e',
+  Shelved:    'color:#444;border-color:#222;background:#141414',
+};
+
+let cases    = [];
+let curTab   = 'All';
+let editId   = null;
+let outlineId = null;
+const expanded = new Set(); // case IDs with outline panel open
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+function loadData() {
+  try { cases = JSON.parse(localStorage.getItem(KEY) || '[]'); }
+  catch { cases = []; }
+  // Migrate older records to include outline field
+  cases = cases.map(c => ({
+    ...c,
+    outline: c.outline || { coldOpen:'', timeline:'', suspects:'', structure:'', production:'', generatedAt:'' }
+  }));
+}
+function persist() {
+  localStorage.setItem(KEY, JSON.stringify(cases));
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  populateSelects();
+  render();
+});
+
+function populateSelects() {
+  ['nStage','eStage'].forEach(id => {
+    const sel = document.getElementById(id);
+    STAGES.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s;
+      o.textContent = ICON[s] + ' ' + s;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  renderTabs();
+  renderStats();
+  renderList();
+}
+
+function hasOutline(c) {
+  const o = c.outline || {};
+  return !!(o.coldOpen || o.timeline || o.suspects || o.structure || o.production);
+}
+
+function renderStats() {
+  const get = stage => cases.filter(c => c.stage === stage).length;
+  document.getElementById('sActive').textContent    = cases.filter(c => ACTIVE.includes(c.stage)).length;
+  document.getElementById('sScripting').textContent = get('Scripting');
+  document.getElementById('sRecording').textContent = get('Recording');
+  document.getElementById('sPublished').textContent = get('Published');
+  document.getElementById('sShelved').textContent   = get('Shelved');
+  document.getElementById('sOutlined').textContent  = cases.filter(hasOutline).length;
+}
+
+function renderTabs() {
+  const tabs = ['All', ...STAGES];
+  document.getElementById('tabsRow').innerHTML = tabs.map(t => {
+    const n = t === 'All' ? cases.length : cases.filter(c => c.stage === t).length;
+    return '<button class="tab-btn' + (t===curTab?' active':'') + '" onclick="setTab(\'' + t + '\')">' +
+      (t!=='All' ? ICON[t]+' ' : '') + t +
+      '<span class="tab-count">' + n + '</span>' +
+      '</button>';
+  }).join('');
+}
+
+function setTab(t) { curTab = t; render(); }
+
+function renderList() {
+  const list = document.getElementById('casesList');
+  const filtered = curTab === 'All' ? [...cases] : cases.filter(c => c.stage === curTab);
+
+  const label = curTab === 'All'
+    ? 'All Cases' + (cases.length ? ' ('+cases.length+')' : '')
+    : ICON[curTab] + ' ' + curTab + (filtered.length ? ' ('+filtered.length+')' : '');
+  document.getElementById('sectionLabel').textContent = label;
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">' +
+      '<div class="empty-icon">' + (curTab==='All'?'📂':ICON[curTab]) + '</div>' +
+      '<div class="empty-msg">' + (curTab==='All'?'No cases yet — add your first above.':'No cases in '+curTab+' stage.') + '</div>' +
+      '</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => caseWrapperHTML(c)).join('');
+}
+
+function age(iso) {
+  if (!iso) return '';
+  const d = Math.floor((Date.now() - new Date(iso)) / 86400000);
+  return d === 0 ? 'today' : d === 1 ? '1 day ago' : d + ' days ago';
+}
+function stageIdx(s) { return STAGES.indexOf(s); }
+
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function caseWrapperHTML(c) {
+  const isOpen = expanded.has(c.id);
+  return '<div class="case-wrapper">' +
+    caseRowHTML(c, isOpen) +
+    '<div class="outline-panel" id="op-' + c.id + '" style="display:' + (isOpen?'block':'none') + '">' +
+      outlinePanelHTML(c) +
+    '</div>' +
+    '</div>';
+}
+
+function caseRowHTML(c, outlineOpen) {
+  const idx  = stageIdx(c.stage);
+  const meta = [c.location, c.year].filter(Boolean).join(' · ');
+  const next = STAGES[idx+1];
+  const canFwd      = idx < STAGES.length - 2;
+  const isShelved   = c.stage === 'Shelved';
+  const isPublished = c.stage === 'Published';
+  const outlined    = hasOutline(c);
+
+  const actions = [];
+  actions.push('<button class="act outline-act' + (outlineOpen?' open':'') + '" onclick="toggleOutline(\'' + c.id + '\')">' + (outlineOpen?'▲':'▼') + ' Outline</button>');
+  if (canFwd && !isShelved)
+    actions.push('<button class="act fwd" onclick="moveFwd(\'' + c.id + '\')">→ ' + esc(next) + '</button>');
+  if (isPublished)
+    actions.push('<button class="act pub" onclick="archive(\'' + c.id + '\')">Archive</button>');
+  actions.push('<button class="act" onclick="openEdit(\'' + c.id + '\')">Edit</button>');
+  if (!isShelved && !isPublished)
+    actions.push('<button class="act" onclick="shelveCase(\'' + c.id + '\')">Shelve</button>');
+  if (isShelved)
+    actions.push('<button class="act restore" onclick="restoreCase(\'' + c.id + '\')">↩ Restore</button>');
+  actions.push('<button class="act del" onclick="removeCase(\'' + c.id + '\')">✕</button>');
+
+  return '<div class="case-row' + (outlineOpen?'':' outline-closed') + '" id="r-' + c.id + '">' +
+    '<div class="case-icon">' + ICON[c.stage] + '</div>' +
+    '<div class="case-body">' +
+      '<div class="case-title">' + esc(c.title) + '</div>' +
+      '<div class="case-meta">' +
+        '<span class="stage-badge" style="' + BADGE[c.stage] + '">' + c.stage + '</span>' +
+        (outlined ? '<span class="outline-badge">✦ Outlined</span>' : '') +
+        (meta ? '<span class="case-loc">' + esc(meta) + '</span>' : '') +
+        '<span class="case-age">Updated ' + age(c.dateUpdated) + '</span>' +
+      '</div>' +
+      (c.notes ? '<div class="case-notes">' + esc(c.notes) + '</div>' : '') +
+    '</div>' +
+    '<div class="case-actions">' + actions.join('') + '</div>' +
+    '</div>';
+}
+
+function outlinePanelHTML(c) {
+  const o = c.outline || {};
+  const outlined = hasOutline(c);
+  const genDate  = o.generatedAt ? new Date(o.generatedAt).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '';
+
+  const section = (label, content) => {
+    const body = content
+      ? '<div class="outline-section-body">' + esc(content) + '</div>'
+      : '<div class="outline-empty">—</div>';
+    return '<div class="outline-section">' +
+      '<div class="outline-section-label">' + label + '</div>' +
+      body +
+      '</div>';
+  };
+
+  if (!outlined) {
+    return '<div class="outline-panel-header">' +
+        '<span class="outline-panel-title">Outline</span>' +
+        '<span class="outline-panel-meta">Not yet generated</span>' +
+        '<button class="outline-edit-btn" onclick="openEditOutline(\'' + c.id + '\')">+ Add Outline</button>' +
+      '</div>' +
+      '<div class="outline-prompt">' +
+        '<div class="outline-prompt-text">Ask Claude to run the show-outline-skill for this case, or add content manually.</div>' +
+      '</div>';
+  }
+
+  return '<div class="outline-panel-header">' +
+      '<span class="outline-panel-title">Outline</span>' +
+      '<span class="outline-panel-meta">' + (genDate ? 'Generated ' + genDate : '') + '</span>' +
+      '<button class="outline-edit-btn" onclick="openEditOutline(\'' + c.id + '\')">Edit</button>' +
+    '</div>' +
+    '<div class="outline-sections">' +
+      section('Cold Open Hook', o.coldOpen) +
+      section('Case Timeline', o.timeline) +
+      section('Suspect Profiles', o.suspects) +
+      section('Episode Structure', o.structure) +
+      '<div class="outline-section full-width" style="border-bottom:none">' +
+        '<div class="outline-section-label">Production Notes</div>' +
+        (o.production
+          ? '<div class="outline-section-body">' + esc(o.production) + '</div>'
+          : '<div class="outline-empty">—</div>') +
+      '</div>' +
+    '</div>';
+}
+
+// ─── Outline toggle ────────────────────────────────────────────────────────────
+function toggleOutline(id) {
+  const panel = document.getElementById('op-' + id);
+  const row   = document.getElementById('r-' + id);
+  if (!panel) return;
+
+  if (expanded.has(id)) {
+    expanded.delete(id);
+    panel.style.display = 'none';
+    row.classList.add('outline-closed');
+    const btn = row.querySelector('.outline-act');
+    if (btn) { btn.textContent = '▼ Outline'; btn.classList.remove('open'); }
+  } else {
+    expanded.add(id);
+    panel.style.display = 'block';
+    row.classList.remove('outline-closed');
+    const btn = row.querySelector('.outline-act');
+    if (btn) { btn.textContent = '▲ Outline'; btn.classList.add('open'); }
+  }
+}
+
+// ─── Outline edit ─────────────────────────────────────────────────────────────
+function openEditOutline(id) {
+  const c = cases.find(x => x.id === id);
+  if (!c) return;
+  outlineId = id;
+  const o = c.outline || {};
+  document.getElementById('outlineModalTitle').textContent = 'Outline · ' + c.title;
+  document.getElementById('oColdOpen').value   = o.coldOpen   || '';
+  document.getElementById('oTimeline').value   = o.timeline   || '';
+  document.getElementById('oSuspects').value   = o.suspects   || '';
+  document.getElementById('oStructure').value  = o.structure  || '';
+  document.getElementById('oProduction').value = o.production || '';
+  document.getElementById('outlineOverlay').classList.add('open');
+}
+
+function saveOutlineEdit() {
+  const c = cases.find(x => x.id === outlineId);
+  if (!c) return;
+  c.outline = {
+    coldOpen:    document.getElementById('oColdOpen').value.trim(),
+    timeline:    document.getElementById('oTimeline').value.trim(),
+    suspects:    document.getElementById('oSuspects').value.trim(),
+    structure:   document.getElementById('oStructure').value.trim(),
+    production:  document.getElementById('oProduction').value.trim(),
+    generatedAt: (c.outline && c.outline.generatedAt) || new Date().toISOString()
+  };
+  if (hasOutline(c)) {
+    c.outline.generatedAt = new Date().toISOString();
+  }
+  c.dateUpdated = new Date().toISOString();
+  persist();
+  closeOutlineEdit();
+  render();
+  if (expanded.has(outlineId)) {
+    const panel = document.getElementById('op-' + outlineId);
+    if (panel) panel.style.display = 'block';
+  }
+}
+
+function closeOutlineEdit() {
+  outlineId = null;
+  document.getElementById('outlineOverlay').classList.remove('open');
+}
+
+// ─── Add form ─────────────────────────────────────────────────────────────────
+function toggleForm() {
+  const f = document.getElementById('addForm');
+  const open = f.classList.toggle('open');
+  document.getElementById('addToggleBtn').textContent = open ? '✕ Cancel' : '+ Add Case';
+  if (open) document.getElementById('nTitle').focus();
+}
+
+function addCase() {
+  const title = document.getElementById('nTitle').value.trim();
+  if (!title) { document.getElementById('nTitle').focus(); return; }
+
+  const c = {
+    id:          uid(),
+    title,
+    stage:       document.getElementById('nStage').value,
+    location:    document.getElementById('nLocation').value.trim(),
+    year:        document.getElementById('nYear').value.trim(),
+    notes:       document.getElementById('nNotes').value.trim(),
+    dateAdded:   new Date().toISOString(),
+    dateUpdated: new Date().toISOString(),
+    outline:     { coldOpen:'', timeline:'', suspects:'', structure:'', production:'', generatedAt:'' }
+  };
+
+  cases.unshift(c);
+  persist();
+
+  ['nTitle','nLocation','nYear','nNotes'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('nStage').value = 'Discovery';
+  document.getElementById('addForm').classList.remove('open');
+  document.getElementById('addToggleBtn').textContent = '+ Add Case';
+
+  curTab = c.stage;
+  render();
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function moveFwd(id) {
+  const c = cases.find(x => x.id===id);
+  if (!c) return;
+  const idx = stageIdx(c.stage);
+  if (idx < STAGES.length-1) {
+    c.stage = STAGES[idx+1];
+    c.dateUpdated = new Date().toISOString();
+    persist();
+    curTab = c.stage;
+    render();
+  }
+}
+
+function shelveCase(id) {
+  const c = cases.find(x => x.id===id);
+  if (!c) return;
+  c.stage = 'Shelved';
+  c.dateUpdated = new Date().toISOString();
+  persist(); render();
+}
+
+function restoreCase(id) {
+  const c = cases.find(x => x.id===id);
+  if (!c) return;
+  c.stage = 'Discovery';
+  c.dateUpdated = new Date().toISOString();
+  persist();
+  curTab = 'Discovery';
+  render();
+}
+
+function archive(id) { render(); }
+
+function removeCase(id) {
+  if (!confirm('Remove this case from the pipeline? This cannot be undone.')) return;
+  cases = cases.filter(x => x.id!==id);
+  expanded.delete(id);
+  persist(); render();
+}
+
+// ─── Edit modal ───────────────────────────────────────────────────────────────
+function openEdit(id) {
+  const c = cases.find(x => x.id===id);
+  if (!c) return;
+  editId = id;
+  document.getElementById('eTitle').value    = c.title;
+  document.getElementById('eStage').value    = c.stage;
+  document.getElementById('eLocation').value = c.location || '';
+  document.getElementById('eYear').value     = c.year || '';
+  document.getElementById('eNotes').value    = c.notes || '';
+  document.getElementById('editOverlay').classList.add('open');
+}
+
+function saveEdit() {
+  const c = cases.find(x => x.id===editId);
+  if (!c) return;
+  const t = document.getElementById('eTitle').value.trim();
+  if (t) c.title = t;
+  c.stage    = document.getElementById('eStage').value;
+  c.location = document.getElementById('eLocation').value.trim();
+  c.year     = document.getElementById('eYear').value.trim();
+  c.notes    = document.getElementById('eNotes').value.trim();
+  c.dateUpdated = new Date().toISOString();
+  persist();
+  closeEdit();
+  render();
+}
+
+function closeEdit() {
+  editId = null;
+  document.getElementById('editOverlay').classList.remove('open');
+}
+
+function overlayClick(e, overlayId) {
+  if (e.target === document.getElementById(overlayId)) {
+    if (overlayId === 'editOverlay') closeEdit();
+    if (overlayId === 'outlineOverlay') closeOutlineEdit();
+  }
+}
+</script>
+</body>
+</html>
