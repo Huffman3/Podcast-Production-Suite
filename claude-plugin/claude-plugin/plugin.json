@@ -1,9 +1,0 @@
-{
-  "name": "podcast-production-suite",
-  "version": "1.4.3",
-  "description": "Everything a podcaster needs — in one plugin. From first research note to final sponsorship invoice. Includes 10 skills: Episode Research, Case Pipeline Tracker, Guest Outreach Writer, Guest Interview Prep, Fact-Check Script, Audio to Transcript, Anti-AI Writing, Marketing Newsletter Writer, Show Outline, and SCQA Writing Framework. Plus 10 interactive dashboards and 5 slash commands.",
-  "author": {
-    "name": "Podcast Production Suite"
-  },
-  "keywords": ["podcast", "true crime", "production", "research", "guest", "revenue", "sponsorship", "transcription", "dashboard", "anti-ai", "episode-research", "newsletter", "email", "marketing", "scqa", "outline", "interview-prep"]
-}
